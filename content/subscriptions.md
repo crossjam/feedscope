@@ -151,6 +151,9 @@ If a `300 Multiple Choices` is returned, it means the requested site exposes mor
 ]
 ```
 
+> [!NOTE]
+> You can also get the subscription API to return search results. If Feedbin detects a URL or hostname, then Feedbin tries to get the feed from that site. If any other string is passed in `feed_url`, then the API returns relevant search results instead.
+
 Delete Subscription
 -------------------
 
