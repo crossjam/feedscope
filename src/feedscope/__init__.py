@@ -10,6 +10,7 @@ import tomlkit
 class FeedscopeConfig(BaseSettings):
     model_config = SettingsConfigDict(
         toml_file=Path(user_config_dir("dev.pirateninja.feedscope")) / "config.toml",
+        toml_table_header=("auth",),
         env_prefix="FEEDSCOPE_"
     )
     
@@ -33,9 +34,13 @@ class FeedscopeConfig(BaseSettings):
         else:
             doc = tomlkit.document()
         
-        # Update values
-        doc["email"] = self.email
-        doc["password"] = self.password
+        # Ensure auth section exists
+        if "auth" not in doc:
+            doc["auth"] = tomlkit.table()
+        
+        # Update values in auth section
+        doc["auth"]["email"] = self.email
+        doc["auth"]["password"] = self.password
         
         # Write back to file
         config_file.write_text(tomlkit.dumps(doc))
