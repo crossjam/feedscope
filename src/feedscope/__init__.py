@@ -51,13 +51,15 @@ class FeedscopeConfig(BaseSettings):
         return cls()
 
 app = typer.Typer(help="Feedscope - CLI for working with Feedbin API content")
+auth_app = typer.Typer(help="Authentication commands")
+app.add_typer(auth_app, name="auth")
 
 def get_config() -> FeedscopeConfig:
     """Get the configuration for use in commands."""
     return FeedscopeConfig.load()
 
-@app.command()
-def auth(
+@auth_app.command()
+def login(
     email: Annotated[str, typer.Argument(help="Feedbin email address")],
     password: Annotated[str, typer.Option("--password", "-p", help="Feedbin password", hide_input=True)] = None
 ) -> None:
@@ -93,6 +95,28 @@ def auth(
             
     except httpx.RequestError as e:
         typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        raise typer.Exit(1)
+
+@auth_app.command()
+def remove() -> None:
+    """Remove stored authentication credentials."""
+    config = get_config()
+    config_file = config.config_file_path
+    
+    if not config_file.exists():
+        typer.echo("❌ No configuration file found", color=typer.colors.RED)
+        raise typer.Exit(1)
+    
+    # Load existing TOML
+    doc = tomlkit.parse(config_file.read_text())
+    
+    # Remove auth section if it exists
+    if "auth" in doc:
+        del doc["auth"]
+        config_file.write_text(tomlkit.dumps(doc))
+        typer.echo("✅ Authentication credentials removed", color=typer.colors.GREEN)
+    else:
+        typer.echo("❌ No authentication credentials found", color=typer.colors.RED)
         raise typer.Exit(1)
 
 def main() -> None:
