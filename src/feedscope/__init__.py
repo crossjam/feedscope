@@ -5,6 +5,7 @@ from rich.prompt import Prompt
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from platformdirs import user_config_dir
 from pathlib import Path
+import tomlkit
 
 class FeedscopeConfig(BaseSettings):
     model_config = SettingsConfigDict(
@@ -15,19 +16,40 @@ class FeedscopeConfig(BaseSettings):
     email: str = ""
     password: str = ""
     
+    @property
+    def config_file_path(self) -> Path:
+        """Get the path to the configuration file."""
+        return Path(user_config_dir("dev.pirateninja.feedscope")) / "config.toml"
+    
     def save(self) -> None:
-        """Save configuration to TOML file."""
+        """Save configuration to TOML file using tomlkit."""
         config_dir = Path(user_config_dir("dev.pirateninja.feedscope"))
         config_dir.mkdir(parents=True, exist_ok=True)
-        config_file = config_dir / "config.toml"
+        config_file = self.config_file_path
         
-        # Write TOML content manually since pydantic-settings doesn't have a built-in save method
-        toml_content = f"""email = "{self.email}"
-password = "{self.password}"
-"""
-        config_file.write_text(toml_content)
+        # Load existing TOML or create new document
+        if config_file.exists():
+            doc = tomlkit.parse(config_file.read_text())
+        else:
+            doc = tomlkit.document()
+        
+        # Update values
+        doc["email"] = self.email
+        doc["password"] = self.password
+        
+        # Write back to file
+        config_file.write_text(tomlkit.dumps(doc))
+    
+    @classmethod
+    def load(cls) -> "FeedscopeConfig":
+        """Load configuration from file."""
+        return cls()
 
 app = typer.Typer(help="Feedscope - CLI for working with Feedbin API content")
+
+def get_config() -> FeedscopeConfig:
+    """Get the configuration for use in commands."""
+    return FeedscopeConfig.load()
 
 @app.command()
 def auth(
@@ -35,6 +57,9 @@ def auth(
     password: Annotated[str, typer.Option("--password", "-p", help="Feedbin password", hide_input=True)] = None
 ) -> None:
     """Check authentication credentials with Feedbin API."""
+    
+    # Load existing config
+    config = get_config()
     
     # Prompt for password if not provided
     if password is None:
@@ -48,10 +73,11 @@ def auth(
         if response.status_code == 200:
             typer.echo("✅ Authentication successful!", color=typer.colors.GREEN)
             
-            # Save credentials to config file
-            config = FeedscopeConfig(email=email, password=password)
+            # Update and save credentials to config file
+            config.email = email
+            config.password = password
             config.save()
-            typer.echo(f"💾 Credentials saved to config file", color=typer.colors.BLUE)
+            typer.echo(f"💾 Credentials saved to {config.config_file_path}", color=typer.colors.BLUE)
             
         elif response.status_code == 401:
             typer.echo("❌ Authentication failed - invalid credentials", color=typer.colors.RED)
