@@ -53,7 +53,7 @@ def get_config() -> FeedscopeConfig:
 
 @app.command()
 def auth(
-    email: Annotated[str, typer.Option("--email", "-e", help="Feedbin email address")],
+    email: Annotated[str, typer.Argument(help="Feedbin email address")],
     password: Annotated[str, typer.Option("--password", "-p", help="Feedbin password", hide_input=True)] = None
 ) -> None:
     """Check authentication credentials with Feedbin API."""
