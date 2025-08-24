@@ -7,7 +7,10 @@ authors = [
     { name = "Brian Dennis", email = "bmd+github@crossjam.net" }
 ]
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "httpx>=0.28.1",
+    "typer>=0.16.1",
+]
 
 [project.scripts]
 feedscope = "feedscope:main"
