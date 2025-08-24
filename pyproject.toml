@@ -1,0 +1,17 @@
+[project]
+name = "feedscope"
+version = "0.1.0"
+description = "Explore feed content aggregated with feedbin"
+readme = "README.md"
+authors = [
+    { name = "Brian Dennis", email = "bmd+github@crossjam.net" }
+]
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+feedscope = "feedscope:main"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
