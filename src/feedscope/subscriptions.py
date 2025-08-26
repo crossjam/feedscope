@@ -51,7 +51,7 @@ def list_subscriptions(
     all_subscriptions = []
 
     try:
-        with get_client() as client, Progress() as progress:
+        with get_client() as client, Progress(disable=jsonl) as progress:
             task_id = None
             while url:
                 response = client.get(url, auth=(config.email, config.password))
