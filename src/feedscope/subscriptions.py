@@ -1,7 +1,7 @@
 import typer
 import httpx
 
-from . import get_config
+from .config import get_config
 
 subscriptions_app = typer.Typer(help="Manage feed subscriptions")
 
