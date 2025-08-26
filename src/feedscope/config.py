@@ -1,3 +1,4 @@
+from pydantic import BaseModel
 from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
@@ -10,13 +11,19 @@ from pathlib import Path
 import tomlkit
 
 
+class Auth(BaseModel):
+    """Authentication credentials."""
+
+    email: str = ""
+    password: str = ""
+
+
 class FeedscopeConfig(BaseSettings):
     model_config = SettingsConfigDict(
         toml_file=Path(user_config_dir("dev.pirateninja.feedscope")) / "config.toml",
     )
 
-    email: str = ""
-    password: str = ""
+    auth: Auth = Auth()
 
     @classmethod
     def settings_customise_sources(
@@ -52,8 +59,16 @@ class FeedscopeConfig(BaseSettings):
             doc = tomlkit.document()
 
         # Update values
-        doc["email"] = self.email
-        doc["password"] = self.password
+        if "auth" not in doc or not isinstance(doc.get("auth"), dict):
+            doc["auth"] = tomlkit.table()
+
+        doc["auth"]["email"] = self.auth.email
+        doc["auth"]["password"] = self.auth.password
+
+        if "email" in doc:
+            del doc["email"]
+        if "password" in doc:
+            del doc["password"]
 
         # Write back to file
         config_file.write_text(tomlkit.dumps(doc))
