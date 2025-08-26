@@ -34,8 +34,8 @@ def login(
             typer.echo("✅ Authentication successful!", color=typer.colors.GREEN)
 
             # Update and save credentials to config file
-            config.email = email
-            config.password = password
+            config.auth.email = email
+            config.auth.password = password
             config.save()
             typer.echo(
                 f"💾 Credentials saved to {config.config_file_path}",
@@ -63,7 +63,7 @@ def status() -> None:
     """Check authentication status."""
     config = get_config()
 
-    if not config.email or not config.password:
+    if not config.auth.email or not config.auth.password:
         typer.echo(
             "❌ No credentials stored. Please run `feedscope auth login`.",
             color=typer.colors.RED,
@@ -71,7 +71,7 @@ def status() -> None:
         raise typer.Exit(1)
 
     typer.echo(
-        f"ℹ️  Credentials for {config.email} found in config file.",
+        f"ℹ️  Credentials for {config.auth.email} found in config file.",
         color=typer.colors.BLUE,
     )
     typer.echo("Verifying credentials with Feedbin API...")
@@ -79,7 +79,7 @@ def status() -> None:
     url = "https://api.feedbin.com/v2/authentication.json"
     try:
         with get_client() as client:
-            response = client.get(url, auth=(config.email, config.password))
+            response = client.get(url, auth=(config.auth.email, config.auth.password))
 
         if response.status_code == 200:
             typer.echo("✅ Authentication successful!", color=typer.colors.GREEN)
@@ -108,9 +108,9 @@ def whoami() -> None:
     """Show the current user from the config file."""
     config = get_config()
 
-    if config.email and config.password:
-        typer.echo(f"User: {config.email}")
-        typer.echo(f"Password: {'*' * len(config.password)}")
+    if config.auth.email and config.auth.password:
+        typer.echo(f"User: {config.auth.email}")
+        typer.echo(f"Password: {'*' * len(config.auth.password)}")
     else:
         typer.echo("No credentials stored.", color=typer.colors.YELLOW)
         typer.echo("Run `feedscope auth login` to store credentials.")
