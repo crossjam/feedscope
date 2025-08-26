@@ -43,7 +43,7 @@ def list_subscriptions(
     """Retrieves and lists all feed subscriptions from Feedbin."""
     config = get_config()
 
-    if not config.email or not config.password:
+    if not config.auth.email or not config.auth.password:
         typer.echo("❌ Authentication credentials not found. Please run `feedscope auth login` first.", color=typer.colors.RED)
         raise typer.Exit(1)
 
@@ -54,7 +54,7 @@ def list_subscriptions(
         with get_client() as client, Progress(disable=jsonl) as progress:
             task_id = None
             while url:
-                response = client.get(url, auth=(config.email, config.password))
+                response = client.get(url, auth=(config.auth.email, config.auth.password))
 
                 if response.status_code != 200:
                     if response.status_code == 401:
