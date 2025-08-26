@@ -1,4 +1,10 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import (
+    BaseSettings,
+    PydanticBaseSettingsSource,
+    SettingsConfigDict,
+    TomlConfigSettingsSource,
+)
+
 from platformdirs import user_config_dir
 from pathlib import Path
 import tomlkit
@@ -11,6 +17,22 @@ class FeedscopeConfig(BaseSettings):
 
     email: str = ""
     password: str = ""
+
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        settings_cls: type[BaseSettings],
+        init_settings: PydanticBaseSettingsSource,
+        env_settings: PydanticBaseSettingsSource,
+        dotenv_settings: PydanticBaseSettingsSource,
+        file_secret_settings: PydanticBaseSettingsSource,
+    ) -> tuple[PydanticBaseSettingsSource, ...]:
+        return (TomlConfigSettingsSource(settings_cls),)
+
+    @classmethod
+    def load(cls) -> "FeedscopeConfig":
+        """Load configuration from file."""
+        return cls()
 
     @property
     def config_file_path(self) -> Path:
@@ -35,11 +57,6 @@ class FeedscopeConfig(BaseSettings):
 
         # Write back to file
         config_file.write_text(tomlkit.dumps(doc))
-
-    @classmethod
-    def load(cls) -> "FeedscopeConfig":
-        """Load configuration from file."""
-        return cls()
 
 
 def get_config() -> FeedscopeConfig:
