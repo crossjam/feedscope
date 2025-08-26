@@ -11,7 +11,7 @@ from pathlib import Path
 import tomlkit
 
 
-class Auth(BaseModel):
+class AuthCredentials(BaseModel):
     """Authentication credentials."""
 
     email: str = ""
@@ -23,7 +23,7 @@ class FeedscopeConfig(BaseSettings):
         toml_file=Path(user_config_dir("dev.pirateninja.feedscope")) / "config.toml",
     )
 
-    auth: Auth = Auth()
+    auth: AuthCredentials = AuthCredentials()
 
     @classmethod
     def settings_customise_sources(
