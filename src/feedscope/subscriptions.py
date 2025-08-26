@@ -2,6 +2,7 @@ import typer
 import httpx
 
 from .config import get_config
+from .client import get_client
 
 subscriptions_app = typer.Typer(help="Manage feed subscriptions")
 
@@ -17,7 +18,8 @@ def list_subscriptions() -> None:
     url = "https://api.feedbin.com/v2/subscriptions.json"
 
     try:
-        response = httpx.get(url, auth=(config.email, config.password))
+        with get_client() as client:
+            response = client.get(url, auth=(config.email, config.password))
 
         if response.status_code == 200:
             subscriptions = response.json()

@@ -7,6 +7,7 @@ import tomlkit
 
 from .subscriptions import subscriptions_app
 from .config import get_config
+from .client import get_client
 
 
 app = typer.Typer(help="Feedscope - CLI for working with Feedbin API content")
@@ -33,7 +34,8 @@ def login(
     url = "https://api.feedbin.com/v2/authentication.json"
     
     try:
-        response = httpx.get(url, auth=(email, password))
+        with get_client() as client:
+            response = client.get(url, auth=(email, password))
         
         if response.status_code == 200:
             typer.echo("✅ Authentication successful!", color=typer.colors.GREEN)
