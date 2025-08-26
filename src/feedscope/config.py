@@ -29,13 +29,9 @@ class FeedscopeConfig(BaseSettings):
         else:
             doc = tomlkit.document()
 
-        # Ensure auth section exists
-        if "auth" not in doc:
-            doc["auth"] = tomlkit.table()
-
-        # Update values in auth section
-        doc["auth"]["email"] = self.email
-        doc["auth"]["password"] = self.password
+        # Update values
+        doc["email"] = self.email
+        doc["password"] = self.password
 
         # Write back to file
         config_file.write_text(tomlkit.dumps(doc))
