@@ -7,6 +7,8 @@ from platformdirs import user_config_dir
 from pathlib import Path
 import tomlkit
 
+from .subscriptions import subscriptions_app
+
 class FeedscopeConfig(BaseSettings):
     model_config = SettingsConfigDict(
         toml_file=Path(user_config_dir("dev.pirateninja.feedscope")) / "config.toml",
@@ -53,6 +55,8 @@ class FeedscopeConfig(BaseSettings):
 app = typer.Typer(help="Feedscope - CLI for working with Feedbin API content")
 auth_app = typer.Typer(help="Authentication commands")
 app.add_typer(auth_app, name="auth")
+
+app.add_typer(subscriptions_app, name="subscriptions")
 
 def get_config() -> FeedscopeConfig:
     """Get the configuration for use in commands."""
