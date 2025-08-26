@@ -4,7 +4,18 @@ import httpx
 from .config import get_config
 from .client import get_client
 
-subscriptions_app = typer.Typer(help="Manage feed subscriptions")
+subscriptions_app = typer.Typer(help="Manage feed subscriptions", invoke_without_command=True)
+
+
+@subscriptions_app.callback()
+def subscriptions(ctx: typer.Context):
+    """
+    Manage feed subscriptions.
+    """
+    if ctx.invoked_subcommand is None:
+        typer.echo(ctx.get_help())
+        raise typer.Exit()
+
 
 @subscriptions_app.command(name="list", help="List all feed subscriptions.")
 def list_subscriptions() -> None:
