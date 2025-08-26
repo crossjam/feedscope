@@ -59,6 +59,51 @@ def login(
 
 
 @auth_app.command()
+def status() -> None:
+    """Check authentication status."""
+    config = get_config()
+
+    if not config.email or not config.password:
+        typer.echo(
+            "❌ No credentials stored. Please run `feedscope auth login`.",
+            color=typer.colors.RED,
+        )
+        raise typer.Exit(1)
+
+    typer.echo(
+        f"ℹ️  Credentials for {config.email} found in config file.",
+        color=typer.colors.BLUE,
+    )
+    typer.echo("Verifying credentials with Feedbin API...")
+
+    url = "https://api.feedbin.com/v2/authentication.json"
+    try:
+        with get_client() as client:
+            response = client.get(url, auth=(config.email, config.password))
+
+        if response.status_code == 200:
+            typer.echo("✅ Authentication successful!", color=typer.colors.GREEN)
+        elif response.status_code == 401:
+            typer.echo(
+                "❌ Authentication failed - invalid credentials.", color=typer.colors.RED
+            )
+            typer.echo(
+                "Please run `feedscope auth login` to update your credentials.",
+                color=typer.colors.YELLOW,
+            )
+            raise typer.Exit(1)
+        else:
+            typer.echo(
+                f"❌ Unexpected response: {response.status_code}", color=typer.colors.RED
+            )
+            raise typer.Exit(1)
+
+    except httpx.RequestError as e:
+        typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        raise typer.Exit(1)
+
+
+@auth_app.command()
 def remove() -> None:
     """Remove stored authentication credentials."""
     config = get_config()
