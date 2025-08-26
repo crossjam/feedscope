@@ -104,6 +104,19 @@ def status() -> None:
 
 
 @auth_app.command()
+def whoami() -> None:
+    """Show the current user from the config file."""
+    config = get_config()
+
+    if config.email and config.password:
+        typer.echo(f"User: {config.email}")
+        typer.echo(f"Password: {'*' * len(config.password)}")
+    else:
+        typer.echo("No credentials stored.", color=typer.colors.YELLOW)
+        typer.echo("Run `feedscope auth login` to store credentials.")
+
+
+@auth_app.command()
 def remove() -> None:
     """Remove stored authentication credentials."""
     config = get_config()
