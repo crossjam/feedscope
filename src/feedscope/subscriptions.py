@@ -7,7 +7,9 @@ import json
 from .config import get_config
 from .client import get_client
 
-subscriptions_app = typer.Typer(help="Manage feed subscriptions", invoke_without_command=True)
+subscriptions_app = typer.Typer(
+    help="Manage feed subscriptions", invoke_without_command=True
+)
 
 
 @subscriptions_app.callback()
@@ -31,6 +33,15 @@ def list_subscriptions(
             min=1,
         ),
     ] = None,
+    page_count: Annotated[
+        int,
+        typer.Option(
+            "--count",
+            "-c",
+            help="Bound the number of subscriptions retrieved on each request.",
+            min=1,
+        ),
+    ] = None,
     jsonl: Annotated[
         bool,
         typer.Option(
@@ -44,31 +55,43 @@ def list_subscriptions(
     config = get_config()
 
     if not config.auth.email or not config.auth.password:
-        typer.echo("❌ Authentication credentials not found. Please run `feedscope auth login` first.", color=typer.colors.RED)
+        typer.echo(
+            "❌ Authentication credentials not found. Please run `feedscope auth login` first.",
+            color=typer.colors.RED,
+        )
         raise typer.Exit(1)
 
-    url = "https://api.feedbin.com/v2/subscriptions.json"
+    url = "https://api.feedbin.com/v2/subscriptions.json?per_page=5"
     all_subscriptions = []
 
     try:
         with get_client() as client, Progress(disable=jsonl) as progress:
             task_id = None
             while url:
-                response = client.get(url, auth=(config.auth.email, config.auth.password))
+                response = client.get(
+                    url, auth=(config.auth.email, config.auth.password)
+                )
 
                 if response.status_code != 200:
                     if response.status_code == 401:
-                        typer.echo("❌ Authentication failed. Please run `feedscope auth login` again.", color=typer.colors.RED)
+                        typer.echo(
+                            "❌ Authentication failed. Please run `feedscope auth login` again.",
+                            color=typer.colors.RED,
+                        )
                     else:
-                        typer.echo(f"❌ Unexpected response: {response.status_code}", color=typer.colors.RED)
+                        typer.echo(
+                            f"❌ Unexpected response: {response.status_code}",
+                            color=typer.colors.RED,
+                        )
                     raise typer.Exit(1)
 
                 if task_id is None and not jsonl:
                     total_records_str = response.headers.get("X-Feedbin-Record-Count")
+                    typer.echo(f"Subscriptions count: {total_records_str.strip()}")
                     if total_records_str:
                         total = int(total_records_str)
                         if limit:
-                            total = min(total, limit)
+                            total = max(min(total, limit), 100)
                         task_id = progress.add_task("[cyan]Downloading...", total=total)
 
                 page_subscriptions = response.json()
@@ -77,7 +100,10 @@ def list_subscriptions(
 
                 all_subscriptions.extend(page_subscriptions)
                 if task_id is not None:
-                    progress.update(task_id, completed=min(len(all_subscriptions), progress.tasks[0].total))
+                    progress.update(
+                        task_id,
+                        completed=min(len(all_subscriptions), progress.tasks[0].total),
+                    )
 
                 if limit and len(all_subscriptions) >= limit:
                     break
