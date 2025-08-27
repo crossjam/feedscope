@@ -6,9 +6,7 @@ import json
 from .config import get_config
 from .client import get_client
 
-subscriptions_app = typer.Typer(
-    help="Manage feed subscriptions", invoke_without_command=True
-)
+subscriptions_app = typer.Typer(help="Manage feed subscriptions", invoke_without_command=True)
 
 
 @subscriptions_app.callback()
@@ -40,20 +38,12 @@ def list_subscriptions(
             is_flag=True,
         ),
     ] = False,
-    extended: Annotated[
-        bool,
-        typer.Option(
-            "--extended",
-            "-e",
-            help="Include extended metadata for the feed.",
-            is_flag=True,
-        ),
-    ] = False,
 ) -> None:
     """Retrieves and lists all feed subscriptions from Feedbin."""
     config = get_config()
 
     if not config.auth.email or not config.auth.password:
+<<<<<<< HEAD
         typer.echo(
             "❌ Authentication credentials not found. Please run `feedscope auth login` first.",
             color=typer.colors.RED,
@@ -107,6 +97,7 @@ def list_subscriptions(
     except httpx.RequestError as e:
         typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
         raise typer.Exit(1)
+
 
 
 @subscriptions_app.command(name="get", help="Get one or more subscriptions by ID.")
