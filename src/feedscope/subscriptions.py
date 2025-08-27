@@ -96,6 +96,9 @@ def list_subscriptions(
         if jsonl:
             for sub in all_subscriptions:
                 typer.echo(json.dumps(sub))
+        elif extended:
+            for sub in all_subscriptions:
+                typer.echo(json.dumps(sub, indent=2))
         else:
             for sub in all_subscriptions:
                 typer.echo(f"[{sub['id']}] {sub['title']} - {sub['feed_url']}")
