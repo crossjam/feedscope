@@ -109,10 +109,10 @@ def list_subscriptions(
         raise typer.Exit(1)
 
 
-@subscriptions_app.command(name="get", help="Get a single subscription by ID.")
-def get_subscription(
-    subscription_id: Annotated[
-        int, typer.Argument(help="The ID of the subscription to get.")
+@subscriptions_app.command(name="get", help="Get one or more subscriptions by ID.")
+def get_subscriptions(
+    subscription_ids: Annotated[
+        list[int], typer.Argument(help="The IDs of the subscriptions to get.")
     ],
     extended: Annotated[
         bool,
@@ -124,7 +124,7 @@ def get_subscription(
         ),
     ] = False,
 ) -> None:
-    """Retrieves a single feed subscription from Feedbin."""
+    """Retrieves one or more feed subscriptions from Feedbin."""
     config = get_config()
 
     if not config.auth.email or not config.auth.password:
@@ -134,38 +134,42 @@ def get_subscription(
         )
         raise typer.Exit(1)
 
-    url = f"https://api.feedbin.com/v2/subscriptions/{subscription_id}.json"
-    if extended:
-        url += "?mode=extended"
-
     try:
         with get_client() as client:
-            response = client.get(
-                url,
-                auth=(config.auth.email, config.auth.password),
-            )
-            typer.echo(f"Retrieving: {response.request.url}", err=True)
+            for subscription_id in subscription_ids:
+                url = f"https://api.feedbin.com/v2/subscriptions/{subscription_id}.json"
+                if extended:
+                    url += "?mode=extended"
 
-            if response.status_code != 200:
-                if response.status_code == 401:
-                    typer.echo(
-                        "❌ Authentication failed. Please run `feedscope auth login` again.",
-                        color=typer.colors.RED,
-                    )
-                elif response.status_code == 403:
-                    typer.echo(
-                        f"❌ Forbidden: You may not own the subscription with ID {subscription_id}.",
-                        color=typer.colors.RED,
-                    )
-                else:
-                    typer.echo(
-                        f"❌ Unexpected response: {response.status_code}",
-                        color=typer.colors.RED,
-                    )
-                raise typer.Exit(1)
+                response = client.get(
+                    url,
+                    auth=(config.auth.email, config.auth.password),
+                )
+                typer.echo(f"Retrieving: {response.request.url}", err=True)
 
-            subscription = response.json()
-            typer.echo(json.dumps(subscription, indent=2))
+                if response.status_code != 200:
+                    if response.status_code == 401:
+                        typer.echo(
+                            "❌ Authentication failed. Please run `feedscope auth login` again.",
+                            color=typer.colors.RED,
+                        )
+                        raise typer.Exit(1)
+                    elif response.status_code == 403:
+                        typer.echo(
+                            f"⚠️ Forbidden: You may not own subscription with ID {subscription_id}. Skipping.",
+                            color=typer.colors.YELLOW,
+                            err=True,
+                        )
+                    else:
+                        typer.echo(
+                            f"⚠️ Unexpected response for subscription ID {subscription_id}: {response.status_code}. Skipping.",
+                            color=typer.colors.YELLOW,
+                            err=True,
+                        )
+                    continue
+
+                subscription = response.json()
+                typer.echo(json.dumps(subscription, indent=2))
 
     except httpx.RequestError as e:
         typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
