@@ -70,6 +70,7 @@ def list_subscriptions(
                 url,
                 auth=(config.auth.email, config.auth.password),
             )
+            typer.echo(f"Retrieving: {response.request.url}", err=True)
             if response.status_code != 200:
                 if response.status_code == 401:
                     typer.echo(
@@ -143,6 +144,7 @@ def get_subscription(
                 url,
                 auth=(config.auth.email, config.auth.password),
             )
+            typer.echo(f"Retrieving: {response.request.url}", err=True)
 
             if response.status_code != 200:
                 if response.status_code == 401:
