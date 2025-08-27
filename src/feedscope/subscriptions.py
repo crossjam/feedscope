@@ -1,7 +1,6 @@
 import typer
 import httpx
 from typing_extensions import Annotated
-from rich.progress import Progress
 import json
 
 from .config import get_config
@@ -33,15 +32,6 @@ def list_subscriptions(
             min=1,
         ),
     ] = None,
-    page_count: Annotated[
-        int,
-        typer.Option(
-            "--count",
-            "-c",
-            help="Bound the number of subscriptions retrieved on each request.",
-            min=1,
-        ),
-    ] = None,
     jsonl: Annotated[
         bool,
         typer.Option(
@@ -61,58 +51,28 @@ def list_subscriptions(
         )
         raise typer.Exit(1)
 
-    url = "https://api.feedbin.com/v2/subscriptions.json?per_page=5"
-    all_subscriptions = []
+    url = "https://api.feedbin.com/v2/subscriptions.json"
 
     try:
-        with get_client() as client, Progress(disable=jsonl) as progress:
-            task_id = None
-            while url:
-                response = client.get(
-                    url, auth=(config.auth.email, config.auth.password)
-                )
+        with get_client() as client:
+            response = client.get(
+                url, auth=(config.auth.email, config.auth.password)
+            )
 
-                if response.status_code != 200:
-                    if response.status_code == 401:
-                        typer.echo(
-                            "❌ Authentication failed. Please run `feedscope auth login` again.",
-                            color=typer.colors.RED,
-                        )
-                    else:
-                        typer.echo(
-                            f"❌ Unexpected response: {response.status_code}",
-                            color=typer.colors.RED,
-                        )
-                    raise typer.Exit(1)
-
-                if task_id is None and not jsonl:
-                    total_records_str = response.headers.get("X-Feedbin-Record-Count")
-                    typer.echo(f"Subscriptions count: {total_records_str.strip()}")
-                    if total_records_str:
-                        total = int(total_records_str)
-                        if limit:
-                            total = max(min(total, limit), 100)
-                        task_id = progress.add_task("[cyan]Downloading...", total=total)
-
-                page_subscriptions = response.json()
-                if not page_subscriptions:
-                    break
-
-                all_subscriptions.extend(page_subscriptions)
-                if task_id is not None:
-                    progress.update(
-                        task_id,
-                        completed=min(len(all_subscriptions), progress.tasks[0].total),
+            if response.status_code != 200:
+                if response.status_code == 401:
+                    typer.echo(
+                        "❌ Authentication failed. Please run `feedscope auth login` again.",
+                        color=typer.colors.RED,
                     )
-
-                if limit and len(all_subscriptions) >= limit:
-                    break
-
-                # Check for next page link
-                if "next" in response.links:
-                    url = response.links["next"]["url"]
                 else:
-                    url = None
+                    typer.echo(
+                        f"❌ Unexpected response: {response.status_code}",
+                        color=typer.colors.RED,
+                    )
+                raise typer.Exit(1)
+
+            all_subscriptions = response.json()
 
         if not all_subscriptions:
             if not jsonl:
