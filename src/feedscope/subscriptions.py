@@ -92,3 +92,53 @@ def list_subscriptions(
     except httpx.RequestError as e:
         typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
         raise typer.Exit(1)
+
+
+@subscriptions_app.command(name="get", help="Get a single subscription by ID.")
+def get_subscription(
+    subscription_id: Annotated[
+        int, typer.Argument(help="The ID of the subscription to get.")
+    ]
+) -> None:
+    """Retrieves a single feed subscription from Feedbin."""
+    config = get_config()
+
+    if not config.auth.email or not config.auth.password:
+        typer.echo(
+            "❌ Authentication credentials not found. Please run `feedscope auth login` first.",
+            color=typer.colors.RED,
+        )
+        raise typer.Exit(1)
+
+    url = f"https://api.feedbin.com/v2/subscriptions/{subscription_id}.json"
+
+    try:
+        with get_client() as client:
+            response = client.get(
+                url, auth=(config.auth.email, config.auth.password)
+            )
+
+            if response.status_code != 200:
+                if response.status_code == 401:
+                    typer.echo(
+                        "❌ Authentication failed. Please run `feedscope auth login` again.",
+                        color=typer.colors.RED,
+                    )
+                elif response.status_code == 403:
+                    typer.echo(
+                        f"❌ Forbidden: You may not own the subscription with ID {subscription_id}.",
+                        color=typer.colors.RED,
+                    )
+                else:
+                    typer.echo(
+                        f"❌ Unexpected response: {response.status_code}",
+                        color=typer.colors.RED,
+                    )
+                raise typer.Exit(1)
+
+            subscription = response.json()
+            typer.echo(json.dumps(subscription, indent=2))
+
+    except httpx.RequestError as e:
+        typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        raise typer.Exit(1)
