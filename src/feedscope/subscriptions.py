@@ -178,7 +178,9 @@ def get_subscriptions(
 
 @subscriptions_app.command(name="create", help="Create a new subscription.")
 def create_subscription(
-    feed_url: Annotated[str, typer.Argument(help="The URL of the feed to subscribe to.")]
+    feed_url: Annotated[
+        str, typer.Argument(help="The URL of the feed to subscribe to.")
+    ],
 ) -> None:
     """Creates a new feed subscription in Feedbin."""
     config = get_config()
@@ -261,7 +263,7 @@ def update_subscription(
 
     try:
         with get_client() as client:
-            response = client.post(
+            response = client.patch(
                 url, json=data, auth=(config.auth.email, config.auth.password)
             )
 
@@ -291,7 +293,7 @@ def update_subscription(
 def delete_subscription(
     subscription_id: Annotated[
         int, typer.Argument(help="The ID of the subscription to delete.")
-    ]
+    ],
 ) -> None:
     """Deletes a feed subscription from Feedbin."""
     if not typer.confirm(
