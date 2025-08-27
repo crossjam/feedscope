@@ -253,7 +253,7 @@ def update_subscription(
 
     try:
         with get_client() as client:
-            response = client.patch(
+            response = client.post(
                 url, json=data, auth=(config.auth.email, config.auth.password)
             )
 
