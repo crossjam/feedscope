@@ -61,18 +61,15 @@ def list_subscriptions(
         raise typer.Exit(1)
 
     url = "https://api.feedbin.com/v2/subscriptions.json"
-    params = {}
     if extended:
-        params["mode"] = "extended"
+        url += "?mode=extended"
 
     try:
         with get_client() as client:
             response = client.get(
                 url,
-                params=params,
                 auth=(config.auth.email, config.auth.password),
             )
-            typer.echo(f"Retrieved: {response.request.url}")
             if response.status_code != 200:
                 if response.status_code == 401:
                     typer.echo(
@@ -134,15 +131,13 @@ def get_subscription(
         raise typer.Exit(1)
 
     url = f"https://api.feedbin.com/v2/subscriptions/{subscription_id}.json"
-    params = {}
     if extended:
-        params["mode"] = "extended"
+        url += "?mode=extended"
 
     try:
         with get_client() as client:
             response = client.get(
                 url,
-                params=params,
                 auth=(config.auth.email, config.auth.password),
             )
 
