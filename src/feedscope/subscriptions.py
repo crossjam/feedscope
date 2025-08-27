@@ -72,7 +72,7 @@ def list_subscriptions(
                 params=params,
                 auth=(config.auth.email, config.auth.password),
             )
-
+            typer.echo(f"Retrieved: {response.request.url}")
             if response.status_code != 200:
                 if response.status_code == 401:
                     typer.echo(
