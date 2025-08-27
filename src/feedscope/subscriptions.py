@@ -236,12 +236,7 @@ def update_subscription(
     subscription_id: Annotated[
         int, typer.Argument(help="The ID of the subscription to update.")
     ],
-    title: Annotated[
-        str,
-        typer.Option(
-            "--title", "-t", help="The new title for the subscription.", prompt=True
-        ),
-    ],
+    title: Annotated[str, typer.Argument(help="The new title for the subscription.")],
 ) -> None:
     """Updates a subscription's title in Feedbin."""
     config = get_config()
