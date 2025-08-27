@@ -237,6 +237,14 @@ def update_subscription(
         int, typer.Argument(help="The ID of the subscription to update.")
     ],
     title: Annotated[str, typer.Argument(help="The new title for the subscription.")],
+    json_output: Annotated[
+        bool,
+        typer.Option(
+            "--json",
+            help="Output the updated subscription as JSON.",
+            is_flag=True,
+        ),
+    ] = False,
 ) -> None:
     """Updates a subscription's title in Feedbin."""
     config = get_config()
@@ -258,7 +266,8 @@ def update_subscription(
             )
 
             if response.status_code == 200:
-                typer.echo("✅ Subscription updated successfully.")
+                if not json_output:
+                    typer.echo("✅ Subscription updated successfully.")
                 typer.echo(json.dumps(response.json(), indent=2))
             elif response.status_code == 403:
                 typer.echo(
