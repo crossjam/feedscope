@@ -40,6 +40,15 @@ def list_subscriptions(
             is_flag=True,
         ),
     ] = False,
+    extended: Annotated[
+        bool,
+        typer.Option(
+            "--extended",
+            "-e",
+            help="Include extended metadata for the feed.",
+            is_flag=True,
+        ),
+    ] = False,
 ) -> None:
     """Retrieves and lists all feed subscriptions from Feedbin."""
     config = get_config()
@@ -52,11 +61,16 @@ def list_subscriptions(
         raise typer.Exit(1)
 
     url = "https://api.feedbin.com/v2/subscriptions.json"
+    params = {}
+    if extended:
+        params["mode"] = "extended"
 
     try:
         with get_client() as client:
             response = client.get(
-                url, auth=(config.auth.email, config.auth.password)
+                url,
+                params=params,
+                auth=(config.auth.email, config.auth.password),
             )
 
             if response.status_code != 200:
@@ -98,7 +112,16 @@ def list_subscriptions(
 def get_subscription(
     subscription_id: Annotated[
         int, typer.Argument(help="The ID of the subscription to get.")
-    ]
+    ],
+    extended: Annotated[
+        bool,
+        typer.Option(
+            "--extended",
+            "-e",
+            help="Include extended metadata for the feed.",
+            is_flag=True,
+        ),
+    ] = False,
 ) -> None:
     """Retrieves a single feed subscription from Feedbin."""
     config = get_config()
@@ -111,11 +134,16 @@ def get_subscription(
         raise typer.Exit(1)
 
     url = f"https://api.feedbin.com/v2/subscriptions/{subscription_id}.json"
+    params = {}
+    if extended:
+        params["mode"] = "extended"
 
     try:
         with get_client() as client:
             response = client.get(
-                url, auth=(config.auth.email, config.auth.password)
+                url,
+                params=params,
+                auth=(config.auth.email, config.auth.password),
             )
 
             if response.status_code != 200:
