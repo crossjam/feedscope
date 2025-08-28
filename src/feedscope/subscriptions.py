@@ -1,13 +1,14 @@
 import typer
 import httpx
 from typing_extensions import Annotated
-from rich.progress import Progress
 import json
 
 from .config import get_config
 from .client import get_client
 
-subscriptions_app = typer.Typer(help="Manage feed subscriptions", invoke_without_command=True)
+subscriptions_app = typer.Typer(
+    help="Manage feed subscriptions", invoke_without_command=True
+)
 
 
 @subscriptions_app.callback()
@@ -31,6 +32,15 @@ def list_subscriptions(
             min=1,
         ),
     ] = None,
+    extended: Annotated[
+        bool,
+        typer.Option(
+            "--extended",
+            "-e",
+            help="Include extended metadata for the feed.",
+            is_flag=True,
+        ),
+    ] = False,
     jsonl: Annotated[
         bool,
         typer.Option(
@@ -44,49 +54,37 @@ def list_subscriptions(
     config = get_config()
 
     if not config.auth.email or not config.auth.password:
-        typer.echo("❌ Authentication credentials not found. Please run `feedscope auth login` first.", color=typer.colors.RED)
+        typer.echo(
+            "❌ Authentication credentials not found. Please run `feedscope auth login` first.",
+            color=typer.colors.RED,
+        )
         raise typer.Exit(1)
 
     url = "https://api.feedbin.com/v2/subscriptions.json"
-    all_subscriptions = []
+    if extended:
+        url += "?mode=extended"
 
     try:
-        with get_client() as client, Progress(disable=jsonl) as progress:
-            task_id = None
-            while url:
-                response = client.get(url, auth=(config.auth.email, config.auth.password))
-
-                if response.status_code != 200:
-                    if response.status_code == 401:
-                        typer.echo("❌ Authentication failed. Please run `feedscope auth login` again.", color=typer.colors.RED)
-                    else:
-                        typer.echo(f"❌ Unexpected response: {response.status_code}", color=typer.colors.RED)
-                    raise typer.Exit(1)
-
-                if task_id is None and not jsonl:
-                    total_records_str = response.headers.get("X-Feedbin-Record-Count")
-                    if total_records_str:
-                        total = int(total_records_str)
-                        if limit:
-                            total = min(total, limit)
-                        task_id = progress.add_task("[cyan]Downloading...", total=total)
-
-                page_subscriptions = response.json()
-                if not page_subscriptions:
-                    break
-
-                all_subscriptions.extend(page_subscriptions)
-                if task_id is not None:
-                    progress.update(task_id, completed=min(len(all_subscriptions), progress.tasks[0].total))
-
-                if limit and len(all_subscriptions) >= limit:
-                    break
-
-                # Check for next page link
-                if "next" in response.links:
-                    url = response.links["next"]["url"]
+        with get_client() as client:
+            response = client.get(
+                url,
+                auth=(config.auth.email, config.auth.password),
+            )
+            typer.echo(f"Retrieving: {response.request.url}", err=True)
+            if response.status_code != 200:
+                if response.status_code == 401:
+                    typer.echo(
+                        "❌ Authentication failed. Please run `feedscope auth login` again.",
+                        color=typer.colors.RED,
+                    )
                 else:
-                    url = None
+                    typer.echo(
+                        f"❌ Unexpected response: {response.status_code}",
+                        color=typer.colors.RED,
+                    )
+                raise typer.Exit(1)
+
+            all_subscriptions = response.json()
 
         if not all_subscriptions:
             if not jsonl:
@@ -99,9 +97,244 @@ def list_subscriptions(
         if jsonl:
             for sub in all_subscriptions:
                 typer.echo(json.dumps(sub))
+        elif extended:
+            for sub in all_subscriptions:
+                typer.echo(json.dumps(sub, indent=2))
         else:
             for sub in all_subscriptions:
                 typer.echo(f"[{sub['id']}] {sub['title']} - {sub['feed_url']}")
+
+    except httpx.RequestError as e:
+        typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        raise typer.Exit(1)
+
+
+@subscriptions_app.command(name="get", help="Get one or more subscriptions by ID.")
+def get_subscriptions(
+    subscription_ids: Annotated[
+        list[int], typer.Argument(help="The IDs of the subscriptions to get.")
+    ],
+    extended: Annotated[
+        bool,
+        typer.Option(
+            "--extended",
+            "-e",
+            help="Include extended metadata for the feed.",
+            is_flag=True,
+        ),
+    ] = False,
+) -> None:
+    """Retrieves one or more feed subscriptions from Feedbin."""
+    config = get_config()
+
+    if not config.auth.email or not config.auth.password:
+        typer.echo(
+            "❌ Authentication credentials not found. Please run `feedscope auth login` first.",
+            color=typer.colors.RED,
+        )
+        raise typer.Exit(1)
+
+    try:
+        with get_client() as client:
+            for subscription_id in subscription_ids:
+                url = f"https://api.feedbin.com/v2/subscriptions/{subscription_id}.json"
+                if extended:
+                    url += "?mode=extended"
+
+                response = client.get(
+                    url,
+                    auth=(config.auth.email, config.auth.password),
+                )
+                typer.echo(f"Retrieving: {response.request.url}", err=True)
+
+                if response.status_code != 200:
+                    if response.status_code == 401:
+                        typer.echo(
+                            "❌ Authentication failed. Please run `feedscope auth login` again.",
+                            color=typer.colors.RED,
+                        )
+                        raise typer.Exit(1)
+                    elif response.status_code == 403:
+                        typer.echo(
+                            f"⚠️ Forbidden: You may not own subscription with ID {subscription_id}. Skipping.",
+                            color=typer.colors.YELLOW,
+                            err=True,
+                        )
+                    else:
+                        typer.echo(
+                            f"⚠️ Unexpected response for subscription ID {subscription_id}: {response.status_code}. Skipping.",
+                            color=typer.colors.YELLOW,
+                            err=True,
+                        )
+                    continue
+
+                subscription = response.json()
+                typer.echo(json.dumps(subscription, indent=2))
+
+    except httpx.RequestError as e:
+        typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        raise typer.Exit(1)
+
+
+@subscriptions_app.command(name="create", help="Create a new subscription.")
+def create_subscription(
+    feed_url: Annotated[
+        str, typer.Argument(help="The URL of the feed to subscribe to.")
+    ],
+) -> None:
+    """Creates a new feed subscription in Feedbin."""
+    config = get_config()
+
+    if not config.auth.email or not config.auth.password:
+        typer.echo(
+            "❌ Authentication credentials not found. Please run `feedscope auth login` first.",
+            color=typer.colors.RED,
+        )
+        raise typer.Exit(1)
+
+    url = "https://api.feedbin.com/v2/subscriptions.json"
+    data = {"feed_url": feed_url}
+
+    try:
+        with get_client() as client:
+            response = client.post(
+                url, json=data, auth=(config.auth.email, config.auth.password)
+            )
+
+            if response.status_code in [201, 302]:
+                status_message = (
+                    "✅ Subscription created successfully."
+                    if response.status_code == 201
+                    else "ℹ️ Subscription already exists."
+                )
+                typer.echo(status_message, color=typer.colors.GREEN)
+                typer.echo(json.dumps(response.json(), indent=2))
+            elif response.status_code == 300:
+                typer.echo(
+                    "⚠️ Multiple feeds found. Please use the exact feed_url from the options below:",
+                    color=typer.colors.YELLOW,
+                )
+                typer.echo(json.dumps(response.json(), indent=2))
+            elif response.status_code == 404:
+                typer.echo(
+                    f"❌ No feed found at the specified URL: {feed_url}",
+                    color=typer.colors.RED,
+                )
+                raise typer.Exit(1)
+            else:
+                typer.echo(
+                    f"❌ Unexpected response: {response.status_code}",
+                    color=typer.colors.RED,
+                )
+                raise typer.Exit(1)
+
+    except httpx.RequestError as e:
+        typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        raise typer.Exit(1)
+
+
+@subscriptions_app.command(name="update", help="Update a subscription's title.")
+def update_subscription(
+    subscription_id: Annotated[
+        int, typer.Argument(help="The ID of the subscription to update.")
+    ],
+    title: Annotated[str, typer.Argument(help="The new title for the subscription.")],
+    json_output: Annotated[
+        bool,
+        typer.Option(
+            "--json",
+            help="Output the updated subscription as JSON.",
+            is_flag=True,
+        ),
+    ] = False,
+) -> None:
+    """Updates a subscription's title in Feedbin."""
+    config = get_config()
+
+    if not config.auth.email or not config.auth.password:
+        typer.echo(
+            "❌ Authentication credentials not found. Please run `feedscope auth login` first.",
+            color=typer.colors.RED,
+        )
+        raise typer.Exit(1)
+
+    url = f"https://api.feedbin.com/v2/subscriptions/{subscription_id}.json"
+    data = {"title": title}
+
+    try:
+        with get_client() as client:
+            response = client.patch(
+                url, json=data, auth=(config.auth.email, config.auth.password)
+            )
+
+            if response.status_code == 200:
+                if not json_output:
+                    typer.echo("✅ Subscription updated successfully.")
+                typer.echo(json.dumps(response.json(), indent=2))
+            elif response.status_code == 403:
+                typer.echo(
+                    f"❌ Forbidden: You may not own the subscription with ID {subscription_id}.",
+                    color=typer.colors.RED,
+                )
+                raise typer.Exit(1)
+            else:
+                typer.echo(
+                    f"❌ Unexpected response: {response.status_code}",
+                    color=typer.colors.RED,
+                )
+                raise typer.Exit(1)
+
+    except httpx.RequestError as e:
+        typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        raise typer.Exit(1)
+
+
+@subscriptions_app.command(name="delete", help="Delete a subscription.")
+def delete_subscription(
+    subscription_id: Annotated[
+        int, typer.Argument(help="The ID of the subscription to delete.")
+    ],
+) -> None:
+    """Deletes a feed subscription from Feedbin."""
+    if not typer.confirm(
+        f"Are you sure you want to delete subscription {subscription_id}?"
+    ):
+        raise typer.Abort()
+
+    config = get_config()
+
+    if not config.auth.email or not config.auth.password:
+        typer.echo(
+            "❌ Authentication credentials not found. Please run `feedscope auth login` first.",
+            color=typer.colors.RED,
+        )
+        raise typer.Exit(1)
+
+    url = f"https://api.feedbin.com/v2/subscriptions/{subscription_id}.json"
+
+    try:
+        with get_client() as client:
+            response = client.delete(
+                url, auth=(config.auth.email, config.auth.password)
+            )
+
+            if response.status_code == 204:
+                typer.echo(
+                    f"✅ Subscription {subscription_id} deleted successfully.",
+                    color=typer.colors.GREEN,
+                )
+            elif response.status_code == 403:
+                typer.echo(
+                    f"❌ Forbidden: You may not own the subscription with ID {subscription_id}.",
+                    color=typer.colors.RED,
+                )
+                raise typer.Exit(1)
+            else:
+                typer.echo(
+                    f"❌ Unexpected response: {response.status_code}",
+                    color=typer.colors.RED,
+                )
+                raise typer.Exit(1)
 
     except httpx.RequestError as e:
         typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
