@@ -51,6 +51,11 @@ poe
 - Write tests you implement into the tests dir
 - Run test with `uv run pytest`
 
+## Python modules
+
+- For cli implementations, prefer click if nothing exists in the
+  project
+- For logging, prefer loguru
 
 ## Planning
 
