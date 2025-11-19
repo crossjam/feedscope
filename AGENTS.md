@@ -52,3 +52,22 @@ poe
 - Run test with `uv run pytest`
 
 
+## Planning
+
+When asked, generate plans for work in markdown format. 
+
+Include a timestamp in the plan each time you create a new plan or add
+updates to a plan.
+
+Unless directed otherwise add newly created plans to a directory
+`plans`. Create that directory if it doesn’t exist.
+
+Usually you should add a markdown checklist for work that needs to be
+done. 
+
+Typically creating new tests is added as a task when new functionality
+is part of the plan.
+
+If links to project issues are given, try to link to them within the
+plan.
+
