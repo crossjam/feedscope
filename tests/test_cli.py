@@ -127,3 +127,33 @@ def test_config_location_outputs_config_dir() -> None:
     assert result.exit_code == 0
     assert str(expected_dir) in result.stdout
     assert "Configuration directory" in result.stdout
+
+
+def test_config_location_emits_logging(tmp_path: Path) -> None:
+    """Config commands should also honor log configuration files."""
+
+    log_file = tmp_path / "cli.log"
+    config_file = tmp_path / "logging.json"
+
+    config_file.write_text(
+        json.dumps(
+            {
+                "handlers": [
+                    {
+                        "sink": str(log_file),
+                        "format": "{message}",
+                        "level": "DEBUG",
+                    }
+                ]
+            }
+        )
+    )
+
+    result = runner.invoke(app, ["--log-config", str(config_file), "config", "location"])
+
+    assert result.exit_code == 0
+    assert log_file.exists()
+    log_contents = log_file.read_text()
+    config_dir = Path(user_config_dir("dev.pirateninja.feedscope"))
+    assert str(config_dir) in log_contents
+    assert str(config_file) in log_contents
