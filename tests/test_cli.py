@@ -115,3 +115,15 @@ def test_log_config_supports_toml(tmp_path: Path) -> None:
     log_contents = log_file.read_text()
     assert "Logging configured from" in log_contents
     assert str(config_file) in log_contents
+
+
+def test_config_location_outputs_config_dir() -> None:
+    """The config location command should print the user config directory."""
+
+    expected_dir = Path(user_config_dir("dev.pirateninja.feedscope"))
+
+    result = runner.invoke(app, ["config", "location"])
+
+    assert result.exit_code == 0
+    assert str(expected_dir) in result.stdout
+    assert "Configuration directory" in result.stdout

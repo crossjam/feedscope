@@ -8,6 +8,7 @@ from loguru_config import LoguruConfig
 from typing_extensions import Annotated
 
 from .auth import auth_app
+from .config_cli import config_app
 from .state import AppState
 from .subscriptions import subscriptions_app
 
@@ -39,6 +40,7 @@ def configure_logging(config_file: Path | None) -> AppState:
 
 app = typer.Typer(help="Feedscope - CLI for working with Feedbin API content")
 app.add_typer(auth_app, name="auth")
+app.add_typer(config_app, name="config")
 app.add_typer(subscriptions_app, name="subscriptions")
 
 
