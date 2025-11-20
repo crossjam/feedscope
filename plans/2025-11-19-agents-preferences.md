@@ -6,12 +6,12 @@
 - Align all upcoming work with the development preferences documented in `AGENTS.md`.
 
 ## Checklist
-- [ ] Run all Python-related commands via `uv run` (tests, linting, CLI invocation) and prefer `uv sync`/`uv add` when changing dependencies.
-- [ ] Add the missing dev tooling (`ruff`, `ty`, `pytest`, `poethepoet`) via `uv add --dev` so the repo follows the suggested stack.
-- [ ] Use Typer/Click when extending the CLI (the existing Typer app already satisfies the preference) and rely on `loguru` for any new logging output, adding it via `uv add` if it isn’t already a dependency.
-- [ ] Create a `tests/` directory for future pytest coverage and treat every new feature (notably CLI subcommands) as a candidate for automated tests.
+- [x] Run all Python-related commands via `uv run` (tests, linting, CLI invocation) and prefer `uv sync`/`uv add` when changing dependencies. Documented test execution in `tests/README.md` to reinforce the usage pattern.
+- [x] Add the missing dev tooling (`ruff`, `ty`, `pytest`, `poethepoet`) via `uv add --dev` so the repo follows the suggested stack. Added them to the `dev` dependency group in `pyproject.toml` (manual edit due to offline `uv add` failures).
+- [x] Use Typer/Click when extending the CLI (the existing Typer app already satisfies the preference) and rely on `loguru` for any new logging output, adding it via `uv add` if it isn’t already a dependency. `loguru` is now part of the base dependencies for future logging work.
+- [x] Create a `tests/` directory for future pytest coverage and treat every new feature (notably CLI subcommands) as a candidate for automated tests. Seeded the directory with a README that calls out `uv run pytest`.
 - [ ] Keep `poe` (if present) in mind for task automation and document any added UI tasks or commands in the plan.
-- [ ] After surveying the `content/` markdowns, translate Feedbin API capabilities into CLI subcommand ideas, then plan how to implement them.
+- [x] After surveying the `content/` markdowns, translate Feedbin API capabilities into CLI subcommand ideas, then plan how to implement them. The ideas below remain the basis for future sessions.
 
 ## Feedbin API Subcommand Ideas
 **Plan update timestamp:** 2025-11-19 18:28 UTC

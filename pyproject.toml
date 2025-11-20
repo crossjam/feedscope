@@ -9,12 +9,14 @@ authors = [
 requires-python = ">=3.11"
 dependencies = [
     "httpx>=0.28.1",
+    "loguru>=0.7.2",
     "platformdirs>=4.0.0",
     "pydantic-settings>=2.0.0",
     "tomlkit>=0.12.0",
     "typer>=0.16.1",
     "rich>=14.1.0",
     "hishel>=0.0.36",
+    "loguru-config",
 ]
 
 [project.scripts]
@@ -23,3 +25,21 @@ feedscope = "feedscope:main"
 [build-system]
 requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
+
+[dependency-groups]
+dev = [
+    "poethepoet>=0.32.2",
+    "pytest>=8.3.3",
+    "ruff>=0.7.3",
+    "ty==0.0.1a27",
+]
+
+[tool.poe.tasks]
+lint = { cmd = "uv run ruff check src tests" }
+format = { cmd = "uv run ruff format src tests" }
+typecheck = { cmd = "uv run ty src/feedscope" }
+test = { cmd = "uv run pytest" }
+qa = { sequence = ["lint", "typecheck", "test"] }
+
+[tool.uv.sources]
+loguru-config = { git = "https://github.com/crossjam/loguru-config" }
