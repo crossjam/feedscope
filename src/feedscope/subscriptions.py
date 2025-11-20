@@ -2,9 +2,11 @@ import typer
 import httpx
 from typing_extensions import Annotated
 import json
+from loguru import logger
 
 from .config import get_config
 from .client import get_client
+from .state import get_state
 
 subscriptions_app = typer.Typer(
     help="Manage feed subscriptions", invoke_without_command=True
@@ -16,6 +18,7 @@ def subscriptions(ctx: typer.Context):
     """
     Manage feed subscriptions.
     """
+    get_state(ctx)
     if ctx.invoked_subcommand is None:
         typer.echo(ctx.get_help())
         raise typer.Exit()
@@ -23,6 +26,7 @@ def subscriptions(ctx: typer.Context):
 
 @subscriptions_app.command(name="list", help="List all feed subscriptions.")
 def list_subscriptions(
+    ctx: typer.Context,
     limit: Annotated[
         int,
         typer.Option(
@@ -38,7 +42,6 @@ def list_subscriptions(
             "--extended",
             "-e",
             help="Include extended metadata for the feed.",
-            is_flag=True,
         ),
     ] = False,
     jsonl: Annotated[
@@ -46,11 +49,12 @@ def list_subscriptions(
         typer.Option(
             "--jsonl",
             help="Output the subscriptions in JSONL format.",
-            is_flag=True,
         ),
     ] = False,
 ) -> None:
     """Retrieves and lists all feed subscriptions from Feedbin."""
+    state = get_state(ctx)
+    logger.debug("Listing subscriptions with log config {}", state.log_config_path)
     config = get_config()
 
     if not config.auth.email or not config.auth.password:
@@ -111,6 +115,7 @@ def list_subscriptions(
 
 @subscriptions_app.command(name="get", help="Get one or more subscriptions by ID.")
 def get_subscriptions(
+    ctx: typer.Context,
     subscription_ids: Annotated[
         list[int], typer.Argument(help="The IDs of the subscriptions to get.")
     ],
@@ -120,11 +125,12 @@ def get_subscriptions(
             "--extended",
             "-e",
             help="Include extended metadata for the feed.",
-            is_flag=True,
         ),
     ] = False,
 ) -> None:
     """Retrieves one or more feed subscriptions from Feedbin."""
+    state = get_state(ctx)
+    logger.debug("Fetching subscriptions with log config {}", state.log_config_path)
     config = get_config()
 
     if not config.auth.email or not config.auth.password:
@@ -178,11 +184,14 @@ def get_subscriptions(
 
 @subscriptions_app.command(name="create", help="Create a new subscription.")
 def create_subscription(
+    ctx: typer.Context,
     feed_url: Annotated[
         str, typer.Argument(help="The URL of the feed to subscribe to.")
     ],
 ) -> None:
     """Creates a new feed subscription in Feedbin."""
+    state = get_state(ctx)
+    logger.debug("Creating subscription with log config {}", state.log_config_path)
     config = get_config()
 
     if not config.auth.email or not config.auth.password:
@@ -235,6 +244,7 @@ def create_subscription(
 
 @subscriptions_app.command(name="update", help="Update a subscription's title.")
 def update_subscription(
+    ctx: typer.Context,
     subscription_id: Annotated[
         int, typer.Argument(help="The ID of the subscription to update.")
     ],
@@ -244,11 +254,12 @@ def update_subscription(
         typer.Option(
             "--json",
             help="Output the updated subscription as JSON.",
-            is_flag=True,
         ),
     ] = False,
 ) -> None:
     """Updates a subscription's title in Feedbin."""
+    state = get_state(ctx)
+    logger.debug("Updating subscription with log config {}", state.log_config_path)
     config = get_config()
 
     if not config.auth.email or not config.auth.password:
@@ -291,11 +302,14 @@ def update_subscription(
 
 @subscriptions_app.command(name="delete", help="Delete a subscription.")
 def delete_subscription(
+    ctx: typer.Context,
     subscription_id: Annotated[
         int, typer.Argument(help="The ID of the subscription to delete.")
     ],
 ) -> None:
     """Deletes a feed subscription from Feedbin."""
+    state = get_state(ctx)
+    logger.debug("Deleting subscription with log config {}", state.log_config_path)
     if not typer.confirm(
         f"Are you sure you want to delete subscription {subscription_id}?"
     ):
