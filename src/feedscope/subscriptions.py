@@ -42,7 +42,6 @@ def list_subscriptions(
             "--extended",
             "-e",
             help="Include extended metadata for the feed.",
-            is_flag=True,
         ),
     ] = False,
     jsonl: Annotated[
@@ -50,7 +49,6 @@ def list_subscriptions(
         typer.Option(
             "--jsonl",
             help="Output the subscriptions in JSONL format.",
-            is_flag=True,
         ),
     ] = False,
 ) -> None:
@@ -127,7 +125,6 @@ def get_subscriptions(
             "--extended",
             "-e",
             help="Include extended metadata for the feed.",
-            is_flag=True,
         ),
     ] = False,
 ) -> None:
@@ -257,7 +254,6 @@ def update_subscription(
         typer.Option(
             "--json",
             help="Output the updated subscription as JSON.",
-            is_flag=True,
         ),
     ] = False,
 ) -> None:
