@@ -12,7 +12,8 @@ from .state import get_state
 
 config_app = typer.Typer(help="Configuration commands")
 
-console = Console(force_terminal=False, color_system=None)
+# Disable Rich wrapping so long paths (e.g., macOS Application Support) stay on one line
+console = Console(force_terminal=False, color_system=None, soft_wrap=True)
 
 
 @config_app.command()
