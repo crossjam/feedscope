@@ -3,21 +3,26 @@ import httpx
 from typing_extensions import Annotated
 from rich.prompt import Prompt
 import tomlkit
+from loguru import logger
 
 from .config import get_config
 from .client import get_client
+from .state import get_state
 
 auth_app = typer.Typer(help="Authentication commands")
 
 
 @auth_app.command()
 def login(
+    ctx: typer.Context,
     email: Annotated[str, typer.Argument(help="Feedbin email address")],
     password: Annotated[str, typer.Option("--password", "-p", help="Feedbin password", hide_input=True)] = None,
 ) -> None:
     """Check authentication credentials with Feedbin API."""
 
     # Load existing config
+    state = get_state(ctx)
+    logger.debug("Starting auth login with log config {}", state.log_config_path)
     config = get_config()
 
     # Prompt for password if not provided
@@ -59,8 +64,10 @@ def login(
 
 
 @auth_app.command()
-def status() -> None:
+def status(ctx: typer.Context) -> None:
     """Check authentication status."""
+    state = get_state(ctx)
+    logger.debug("Checking auth status using log config {}", state.log_config_path)
     config = get_config()
 
     if not config.auth.email or not config.auth.password:
@@ -104,8 +111,10 @@ def status() -> None:
 
 
 @auth_app.command()
-def whoami() -> None:
+def whoami(ctx: typer.Context) -> None:
     """Show the current user from the config file."""
+    state = get_state(ctx)
+    logger.debug("Inspecting current auth user with log config {}", state.log_config_path)
     config = get_config()
 
     if config.auth.email and config.auth.password:
@@ -117,8 +126,10 @@ def whoami() -> None:
 
 
 @auth_app.command()
-def remove() -> None:
+def remove(ctx: typer.Context) -> None:
     """Remove stored authentication credentials."""
+    state = get_state(ctx)
+    logger.debug("Removing stored credentials with log config {}", state.log_config_path)
     config = get_config()
     config_file = config.config_file_path
 

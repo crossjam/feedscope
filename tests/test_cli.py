@@ -86,7 +86,9 @@ def test_log_config_initializes_loguru(tmp_path: Path) -> None:
 
     assert result.exit_code == 0
     assert log_file.exists()
-    assert "Logging configured from" in log_file.read_text()
+    log_contents = log_file.read_text()
+    assert "Logging configured from" in log_contents
+    assert str(config_file) in log_contents
 
 
 def test_log_config_supports_toml(tmp_path: Path) -> None:
@@ -110,4 +112,6 @@ def test_log_config_supports_toml(tmp_path: Path) -> None:
 
     assert result.exit_code == 0
     assert log_file.exists()
-    assert "Logging configured from" in log_file.read_text()
+    log_contents = log_file.read_text()
+    assert "Logging configured from" in log_contents
+    assert str(config_file) in log_contents

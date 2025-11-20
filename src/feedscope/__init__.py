@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 import tomllib
 
@@ -7,23 +8,27 @@ from loguru_config import LoguruConfig
 from typing_extensions import Annotated
 
 from .auth import auth_app
+from .state import AppState
 from .subscriptions import subscriptions_app
 
 
-def configure_logging(config_file: Path | None) -> None:
+def configure_logging(config_file: Path | None) -> AppState:
     """Configure loguru from a config file if provided."""
 
     if config_file is None:
-        return
+        return AppState()
 
     try:
         if config_file.suffix.lower() == ".toml":
             with config_file.open("rb") as handle:
                 config_data = tomllib.load(handle)
-            LoguruConfig.load(config_data)
         else:
-            LoguruConfig.load(str(config_file))
+            with config_file.open("r", encoding="utf-8") as handle:
+                config_data = json.load(handle)
+
+        LoguruConfig.load(config_data)
         logger.debug("Logging configured from {}", config_file)
+        return AppState(log_config_path=config_file, log_config_data=config_data)
     except Exception as exc:  # pragma: no cover - defensive catch for CLI UX
         typer.echo(
             f"❌ Failed to configure logging from {config_file}: {exc}",
@@ -39,6 +44,7 @@ app.add_typer(subscriptions_app, name="subscriptions")
 
 @app.callback()
 def root(
+    ctx: typer.Context,
     log_config: Annotated[
         Path | None,
         typer.Option(
@@ -51,7 +57,7 @@ def root(
         ),
     ] = None,
 ) -> None:
-    configure_logging(log_config)
+    ctx.obj = configure_logging(log_config)
 
 
 def main() -> None:
