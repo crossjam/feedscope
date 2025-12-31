@@ -39,7 +39,7 @@ dev = [
 [tool.poe.tasks]
 lint = { cmd = "uv run ruff check src tests" }
 format = { cmd = "uv run ruff format src tests" }
-typecheck = { cmd = "uv run ty src/feedscope" }
+typecheck = { cmd = "uv run ty check src/feedscope" }
 test = { cmd = "uv run pytest" }
 qa = { sequence = ["lint", "typecheck", "test"] }
 
