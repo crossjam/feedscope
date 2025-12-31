@@ -24,11 +24,11 @@
 - [x] Write tests verifying query parameter serialization and response handling (mock `httpx.Client` via `respx` or similar) for each command.
 
 ## Phase 2: Entry state management
-- [ ] Provide `feedscope unread list` plus `mark-read`/`mark-unread` commands that POST/DELETE `unread_entries` per `content/unread-entries.md`, enforcing the 1,000-entry limit with validation.
-- [ ] Mirror that behavior for `feedscope starred list/star/unstar` to match `content/starred-entries.md`.
-- [ ] Add `feedscope updated list` and `feedscope updated mark-read` using `content/updated-entries.md`, reusing the entry-fetch helpers from Phase 1 to display diffs when `--include-diff` is requested.
-- [ ] Create `feedscope recently-read list/create` per `content/recently-read-entries.md`.
-- [ ] Cover these commands with dedicated tests that mock the ID arrays and confirm the right HTTP verb/payload is sent.
+- [x] Provide `feedscope unread list` plus `mark-read`/`mark-unread` commands that POST/DELETE `unread_entries` per `content/unread-entries.md`, enforcing the 1,000-entry limit with validation.
+- [x] Mirror that behavior for `feedscope starred list/star/unstar` to match `content/starred-entries.md`.
+- [x] Add `feedscope updated list` and `feedscope updated mark-read` using `content/updated-entries.md`, reusing the entry-fetch helpers from Phase 1 to display diffs when `--include-diff` is requested.
+- [x] Create `feedscope recently-read list/create` per `content/recently-read-entries.md`.
+- [x] Cover these commands with dedicated tests that mock the ID arrays and confirm the right HTTP verb/payload is sent.
 
 ## Phase 3: Saved searches, tags & taggings
 - [ ] Add `feedscope saved-search list`, `get`, `create`, `update`, and `delete` commands following `content/saved-searches.md`, including `--include-entries` and pagination options.
