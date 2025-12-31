@@ -18,10 +18,10 @@
 - [x] Ensure the cached `CacheClient` from `hishel` is configured to store responses for safe GET-like requests; make cache-control decisions explicit so stale data isn't re-used for write operations.
 
 ## Phase 1: Entries & feed metadata
-- [ ] Build `feedscope entries list` with support for `--since`, `--page`, `--per-page`, `--read/--starred`, `--mode`, `--include-original`, `--include-enclosure`, and `--include-content-diff`, matching `content/entries.md`.
-- [ ] Add `feedscope entries show <entry-id>` to fetch `GET /v2/entries/<id>.json` along with error handling for status codes listed in `content/entries.md`.
-- [ ] Implement `feedscope entries feed <feed-id>` (or similar) to wrap `GET /v2/feeds/<id>/entries.json` and honor the same filters.
-- [ ] Write tests verifying query parameter serialization and response handling (mock `httpx.Client` via `respx` or similar) for each command.
+- [x] Build `feedscope entries list` with support for `--since`, `--page`, `--per-page`, `--read/--starred`, `--mode`, `--include-original`, `--include-enclosure`, and `--include-content-diff`, matching `content/entries.md`.
+- [x] Add `feedscope entries show <entry-id>` to fetch `GET /v2/entries/<id>.json` along with error handling for status codes listed in `content/entries.md`.
+- [x] Implement `feedscope entries feed <feed-id>` (or similar) to wrap `GET /v2/feeds/<id>/entries.json` and honor the same filters.
+- [x] Write tests verifying query parameter serialization and response handling (mock `httpx.Client` via `respx` or similar) for each command.
 
 ## Phase 2: Entry state management
 - [ ] Provide `feedscope unread list` plus `mark-read`/`mark-unread` commands that POST/DELETE `unread_entries` per `content/unread-entries.md`, enforcing the 1,000-entry limit with validation.
