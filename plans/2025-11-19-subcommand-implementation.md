@@ -31,9 +31,9 @@
 - [x] Cover these commands with dedicated tests that mock the ID arrays and confirm the right HTTP verb/payload is sent.
 
 ## Phase 3: Saved searches, tags & taggings
-- [ ] Add `feedscope saved-search list`, `get`, `create`, `update`, and `delete` commands following `content/saved-searches.md`, including `--include-entries` and pagination options.
-- [ ] Provide `feedscope tags rename`/`delete` and `feedscope taggings list/create/delete` inspired by `content/tags.md` and `content/taggings.md`.
-- [ ] Ensure CLI output exposes the relevant JSON arrays (e.g., after rename/delete the updated taggings array) and write pytest coverage for success/failure paths.
+- [x] Add `feedscope saved-search list`, `get`, `create`, `update`, and `delete` commands following `content/saved-searches.md`, including `--include-entries` and pagination options.
+- [x] Provide `feedscope tags rename`/`delete` and `feedscope taggings list/create/delete` inspired by `content/tags.md` and `content/taggings.md`.
+- [x] Ensure CLI output exposes the relevant JSON arrays (e.g., after rename/delete the updated taggings array) and write pytest coverage for success/failure paths.
 
 ## Phase 4: Supporting APIs
 - [ ] Implement `feedscope imports create|list|status` that uploads OPML, sets `Content-Type: text/xml`, and re-uses the client cache.
