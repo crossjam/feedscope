@@ -17,6 +17,11 @@ class AuthCredentials(BaseModel):
     email: str = ""
     password: str = ""
 
+class ExtractCredentials(BaseModel):
+    """Extraction service credentials."""
+    username: str = ""
+    secret: str = ""
+
 
 class FeedscopeConfig(BaseSettings):
     model_config = SettingsConfigDict(
@@ -24,6 +29,7 @@ class FeedscopeConfig(BaseSettings):
     )
 
     auth: AuthCredentials = AuthCredentials()
+    extract: ExtractCredentials = ExtractCredentials()
 
     @classmethod
     def settings_customise_sources(
@@ -58,12 +64,19 @@ class FeedscopeConfig(BaseSettings):
         else:
             doc = tomlkit.document()
 
-        # Update values
+        # Update auth
         if "auth" not in doc or not isinstance(doc.get("auth"), dict):
             doc["auth"] = tomlkit.table()
 
         doc["auth"]["email"] = self.auth.email
         doc["auth"]["password"] = self.auth.password
+
+        # Update extract
+        if "extract" not in doc or not isinstance(doc.get("extract"), dict):
+            doc["extract"] = tomlkit.table()
+
+        doc["extract"]["username"] = self.extract.username
+        doc["extract"]["secret"] = self.extract.secret
 
         if "email" in doc:
             del doc["email"]

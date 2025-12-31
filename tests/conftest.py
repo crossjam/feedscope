@@ -20,6 +20,10 @@ def clean_config_file() -> None:
         CONFIG_FILE.unlink()
 
 @pytest.fixture
+def config_path():
+    return CONFIG_FILE
+
+@pytest.fixture
 def auth_config(clean_config_file):
     """Setup auth config."""
     # Write a dummy config

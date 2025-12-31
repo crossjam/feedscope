@@ -36,11 +36,11 @@
 - [x] Ensure CLI output exposes the relevant JSON arrays (e.g., after rename/delete the updated taggings array) and write pytest coverage for success/failure paths.
 
 ## Phase 4: Supporting APIs
-- [ ] Implement `feedscope imports create|list|status` that uploads OPML, sets `Content-Type: text/xml`, and re-uses the client cache.
-- [ ] Provide `feedscope pages save` to POST URLs/titles (`content/pages.md`) and return the created entry payload.
-- [ ] Add `feedscope icons list` for `GET /v2/icons.json` and consider caching or optional JSONL output for scripting.
-- [ ] Create an `extract` command that, given credentials stored in config (new `extract.username`/`extract.secret` entries), builds the HMAC-SHA1 signature as in `content/extract-full-content.md` before fetching parse results.
-- [ ] Ensure each API helper has a test that mocks `httpx` responses and validates that required headers/payloads are constructed correctly.
+- [x] Implement `feedscope imports create|list|status` that uploads OPML, sets `Content-Type: text/xml`, and re-uses the client cache.
+- [x] Provide `feedscope pages save` to POST URLs/titles (`content/pages.md`) and return the created entry payload.
+- [x] Add `feedscope icons list` for `GET /v2/icons.json` and consider caching or optional JSONL output for scripting.
+- [x] Create an `extract` command that, given credentials stored in config (new `extract.username`/`extract.secret` entries), builds the HMAC-SHA1 signature as in `content/extract-full-content.md` before fetching parse results.
+- [x] Ensure each API helper has a test that mocks `httpx` responses and validates that required headers/payloads are constructed correctly.
 
 ## Phase 5: Workflow & polishing
 - [ ] Update the README (or add CLI docs) to describe the new commands, referencing the content docs as the API source of truth.
