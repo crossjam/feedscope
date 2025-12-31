@@ -10,12 +10,12 @@
 - Deliver the Feedbin-aligned subcommands outlined in `plans/2025-11-19-agents-preferences.md`, starting with entries retrieval, state management (unread/starred/updated/recently read), saved searches/tags, imports/pages/icons, and support utilities such as feed metadata and the full-content extractor.
 
 ## Infrastructure tasks
-- [ ] Introduce new Typer sub-app modules (e.g., `entries.py`, `state.py`, `searches.py`, `utils.py`) so the main `feedscope` app can keep concerns separate while still using Click under the hood.
-- [ ] Add `loguru` via `uv add` and use it consistently for debug/info messages inside the new command modules; keep user-facing output via `typer.echo`.
-- [ ] Create a `tests/` directory (per AGENTS) and populate it with CLI-focused pytest files that use Typer’s `CliRunner` to simulate commands.
-- [ ] Document `uv run pytest`, `uv run ruff`, and `uv run ty` in README/CONTRIBUTING if needed (so future contributors remember AGENTS requirements).
-- [ ] Add the `stamina` retry/backoff library via `uv add` and wrap `httpx` requests with its policies so the CLI gracefully handles transient errors for GET/DELETE requests, logging retries through `loguru`.
-- [ ] Ensure the cached `CacheClient` from `hishel` is configured to store responses for safe GET-like requests; make cache-control decisions explicit so stale data isn't re-used for write operations.
+- [x] Introduce new Typer sub-app modules (e.g., `entries.py`, `state.py`, `searches.py`, `utils.py`) so the main `feedscope` app can keep concerns separate while still using Click under the hood.
+- [x] Add `loguru` via `uv add` and use it consistently for debug/info messages inside the new command modules; keep user-facing output via `typer.echo`.
+- [x] Create a `tests/` directory (per AGENTS) and populate it with CLI-focused pytest files that use Typer’s `CliRunner` to simulate commands.
+- [x] Document `uv run pytest`, `uv run ruff`, and `uv run ty` in README/CONTRIBUTING if needed (so future contributors remember AGENTS requirements).
+- [x] Add the `stamina` retry/backoff library via `uv add` and wrap `httpx` requests with its policies so the CLI gracefully handles transient errors for GET/DELETE requests, logging retries through `loguru`.
+- [x] Ensure the cached `CacheClient` from `hishel` is configured to store responses for safe GET-like requests; make cache-control decisions explicit so stale data isn't re-used for write operations.
 
 ## Phase 1: Entries & feed metadata
 - [ ] Build `feedscope entries list` with support for `--since`, `--page`, `--per-page`, `--read/--starred`, `--mode`, `--include-original`, `--include-enclosure`, and `--include-content-diff`, matching `content/entries.md`.

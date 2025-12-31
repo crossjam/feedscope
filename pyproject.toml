@@ -17,6 +17,7 @@ dependencies = [
     "rich>=14.1.0",
     "hishel>=0.0.36",
     "loguru-config",
+    "stamina>=25.2.0",
 ]
 
 [project.scripts]
