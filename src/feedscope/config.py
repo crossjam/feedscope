@@ -17,8 +17,10 @@ class AuthCredentials(BaseModel):
     email: str = ""
     password: str = ""
 
+
 class ExtractCredentials(BaseModel):
     """Extraction service credentials."""
+
     username: str = ""
     secret: str = ""
 

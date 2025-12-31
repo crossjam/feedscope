@@ -1,17 +1,15 @@
 """Utility functions for Feedscope CLI."""
+
 import typer
 import httpx
 import json
 from loguru import logger
 from .client import get_client
 from .config import get_config
-from .state import get_state
+
 
 def fetch_and_display_entries(
-    ctx: typer.Context,
-    url: str,
-    params: dict,
-    json_output: bool
+    ctx: typer.Context, url: str, params: dict, json_output: bool
 ):
     """
     Fetches entries from URL with params and displays them.
@@ -35,7 +33,7 @@ def fetch_and_display_entries(
                 params=params,
                 auth=(config.auth.email, config.auth.password),
             )
-            
+
             if response.status_code != 200:
                 typer.echo(f"Error fetching entries: {response.status_code}", err=True)
                 if response.status_code == 403:
@@ -45,7 +43,7 @@ def fetch_and_display_entries(
                 raise typer.Exit(1)
 
             entries = response.json()
-            
+
             if json_output:
                 typer.echo(json.dumps(entries, indent=2))
             else:

@@ -43,6 +43,6 @@
 - [x] Ensure each API helper has a test that mocks `httpx` responses and validates that required headers/payloads are constructed correctly.
 
 ## Phase 5: Workflow & polishing
-- [ ] Update the README (or add CLI docs) to describe the new commands, referencing the content docs as the API source of truth.
-- [ ] Run `uv run ruff format`, `uv run ty`, and `uv run pytest` after implementing each phase to keep the codebase clean.
+- [x] Update the README (or add CLI docs) to describe the new commands, referencing the content docs as the API source of truth.
+- [x] Run `uv run ruff format`, `uv run ty`, and `uv run pytest` after implementing each phase to keep the codebase clean.
 - [ ] Optional: expose `feedscope auth status` improvements or helper `feedscope config show` if needed to expose additional configuration fields (e.g., Extract credentials).

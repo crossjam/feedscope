@@ -1,8 +1,8 @@
 """Basic CLI operation tests for feedscope."""
+
 from pathlib import Path
 import json
 
-import pytest
 from platformdirs import user_config_dir
 from typer.testing import CliRunner
 from feedscope import app
@@ -77,7 +77,7 @@ def test_log_config_supports_toml(tmp_path: Path) -> None:
         "\n".join(
             [
                 "handlers = [",
-                f"  {{ sink = \"{log_file}\", format = \"{{message}}\", level = \"DEBUG\" }}",
+                f'  {{ sink = "{log_file}", format = "{{message}}", level = "DEBUG" }}',
                 "]",
                 "",
             ]
@@ -125,7 +125,9 @@ def test_config_location_emits_logging(tmp_path: Path) -> None:
         )
     )
 
-    result = runner.invoke(app, ["--log-config", str(config_file), "config", "location"])
+    result = runner.invoke(
+        app, ["--log-config", str(config_file), "config", "location"]
+    )
 
     assert result.exit_code == 0
     assert log_file.exists()

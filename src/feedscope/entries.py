@@ -3,15 +3,14 @@ from typing import Optional
 from typing_extensions import Annotated
 from datetime import datetime
 import json
-from loguru import logger
 import httpx
 
-from .state import get_state
 from .config import get_config
 from .client import get_client
 from .utils import fetch_and_display_entries
 
 entries_app = typer.Typer(help="Retrieve and manage entries")
+
 
 def _build_entry_params(
     page: Optional[int] = None,
@@ -45,71 +44,122 @@ def _build_entry_params(
         params["include_content_diff"] = "true"
     return params
 
+
 @entries_app.command(name="list")
 def list_entries(
     ctx: typer.Context,
     page: Annotated[Optional[int], typer.Option(help="Page number")] = None,
-    per_page: Annotated[Optional[int], typer.Option(help="Number of entries per page")] = None,
-    since: Annotated[Optional[datetime], typer.Option(help="Get entries created after this timestamp")] = None,
+    per_page: Annotated[
+        Optional[int], typer.Option(help="Number of entries per page")
+    ] = None,
+    since: Annotated[
+        Optional[datetime],
+        typer.Option(help="Get entries created after this timestamp"),
+    ] = None,
     read: Annotated[Optional[bool], typer.Option(help="Filter by read status")] = None,
-    starred: Annotated[Optional[bool], typer.Option(help="Filter by starred status")] = None,
+    starred: Annotated[
+        Optional[bool], typer.Option(help="Filter by starred status")
+    ] = None,
     mode: Annotated[Optional[str], typer.Option(help="Mode (e.g. extended)")] = None,
-    include_original: Annotated[bool, typer.Option(help="Include original entry data")] = False,
-    include_enclosure: Annotated[bool, typer.Option(help="Include enclosure data")] = False,
-    include_content_diff: Annotated[bool, typer.Option(help="Include content diff")] = False,
-    json_output: Annotated[bool, typer.Option("--json", help="Output raw JSON")] = False,
+    include_original: Annotated[
+        bool, typer.Option(help="Include original entry data")
+    ] = False,
+    include_enclosure: Annotated[
+        bool, typer.Option(help="Include enclosure data")
+    ] = False,
+    include_content_diff: Annotated[
+        bool, typer.Option(help="Include content diff")
+    ] = False,
+    json_output: Annotated[
+        bool, typer.Option("--json", help="Output raw JSON")
+    ] = False,
 ):
     """List entries."""
     params = _build_entry_params(
-        page, per_page, since, read, starred, mode,
-        include_original, include_enclosure, include_content_diff
+        page,
+        per_page,
+        since,
+        read,
+        starred,
+        mode,
+        include_original,
+        include_enclosure,
+        include_content_diff,
     )
     fetch_and_display_entries(
-        ctx,
-        "https://api.feedbin.com/v2/entries.json",
-        params,
-        json_output
+        ctx, "https://api.feedbin.com/v2/entries.json", params, json_output
     )
+
 
 @entries_app.command(name="feed")
 def feed_entries(
     ctx: typer.Context,
     feed_id: Annotated[int, typer.Argument(help="Feed ID")],
     page: Annotated[Optional[int], typer.Option(help="Page number")] = None,
-    per_page: Annotated[Optional[int], typer.Option(help="Number of entries per page")] = None,
-    since: Annotated[Optional[datetime], typer.Option(help="Get entries created after this timestamp")] = None,
+    per_page: Annotated[
+        Optional[int], typer.Option(help="Number of entries per page")
+    ] = None,
+    since: Annotated[
+        Optional[datetime],
+        typer.Option(help="Get entries created after this timestamp"),
+    ] = None,
     read: Annotated[Optional[bool], typer.Option(help="Filter by read status")] = None,
-    starred: Annotated[Optional[bool], typer.Option(help="Filter by starred status")] = None,
+    starred: Annotated[
+        Optional[bool], typer.Option(help="Filter by starred status")
+    ] = None,
     mode: Annotated[Optional[str], typer.Option(help="Mode (e.g. extended)")] = None,
-    include_original: Annotated[bool, typer.Option(help="Include original entry data")] = False,
-    include_enclosure: Annotated[bool, typer.Option(help="Include enclosure data")] = False,
-    include_content_diff: Annotated[bool, typer.Option(help="Include content diff")] = False,
-    json_output: Annotated[bool, typer.Option("--json", help="Output raw JSON")] = False,
+    include_original: Annotated[
+        bool, typer.Option(help="Include original entry data")
+    ] = False,
+    include_enclosure: Annotated[
+        bool, typer.Option(help="Include enclosure data")
+    ] = False,
+    include_content_diff: Annotated[
+        bool, typer.Option(help="Include content diff")
+    ] = False,
+    json_output: Annotated[
+        bool, typer.Option("--json", help="Output raw JSON")
+    ] = False,
 ):
     """List entries for a specific feed."""
     params = _build_entry_params(
-        page, per_page, since, read, starred, mode,
-        include_original, include_enclosure, include_content_diff
+        page,
+        per_page,
+        since,
+        read,
+        starred,
+        mode,
+        include_original,
+        include_enclosure,
+        include_content_diff,
     )
     fetch_and_display_entries(
         ctx,
         f"https://api.feedbin.com/v2/feeds/{feed_id}/entries.json",
         params,
-        json_output
+        json_output,
     )
+
 
 @entries_app.command(name="show")
 def show_entry(
     ctx: typer.Context,
     entry_id: Annotated[int, typer.Argument(help="Entry ID")],
     mode: Annotated[Optional[str], typer.Option(help="Mode (e.g. extended)")] = None,
-    include_original: Annotated[bool, typer.Option(help="Include original entry data")] = False,
-    include_enclosure: Annotated[bool, typer.Option(help="Include enclosure data")] = False,
-    include_content_diff: Annotated[bool, typer.Option(help="Include content diff")] = False,
-    json_output: Annotated[bool, typer.Option("--json", help="Output raw JSON")] = False,
+    include_original: Annotated[
+        bool, typer.Option(help="Include original entry data")
+    ] = False,
+    include_enclosure: Annotated[
+        bool, typer.Option(help="Include enclosure data")
+    ] = False,
+    include_content_diff: Annotated[
+        bool, typer.Option(help="Include content diff")
+    ] = False,
+    json_output: Annotated[
+        bool, typer.Option("--json", help="Output raw JSON")
+    ] = False,
 ):
     """Show a single entry."""
-    state = get_state(ctx)
     config = get_config()
 
     if not config.auth.email or not config.auth.password:
@@ -118,7 +168,7 @@ def show_entry(
             color=typer.colors.RED,
         )
         raise typer.Exit(1)
-        
+
     url = f"https://api.feedbin.com/v2/entries/{entry_id}.json"
     params = {}
     if mode is not None:
@@ -129,7 +179,7 @@ def show_entry(
         params["include_enclosure"] = "true"
     if include_content_diff:
         params["include_content_diff"] = "true"
-        
+
     try:
         with get_client() as client:
             response = client.get(
@@ -137,15 +187,17 @@ def show_entry(
                 params=params,
                 auth=(config.auth.email, config.auth.password),
             )
-            
+
             if response.status_code != 200:
                 typer.echo(f"Error fetching entry: {response.status_code}", err=True)
                 if response.status_code == 404:
                     typer.echo("Entry not found.", err=True)
                 elif response.status_code == 403:
-                    typer.echo("Forbidden. You may not have access to this entry.", err=True)
+                    typer.echo(
+                        "Forbidden. You may not have access to this entry.", err=True
+                    )
                 raise typer.Exit(1)
-                
+
             entry = response.json()
             if json_output:
                 typer.echo(json.dumps(entry, indent=2))
@@ -157,7 +209,7 @@ def show_entry(
                 if mode == "extended":
                     typer.echo(f"Author: {entry.get('author')}")
                     typer.echo(f"Summary: {entry.get('summary')}")
-                
+
     except httpx.RequestError as e:
         typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
         raise typer.Exit(1)

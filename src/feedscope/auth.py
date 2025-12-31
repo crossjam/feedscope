@@ -16,7 +16,9 @@ auth_app = typer.Typer(help="Authentication commands")
 def login(
     ctx: typer.Context,
     email: Annotated[str, typer.Argument(help="Feedbin email address")],
-    password: Annotated[str, typer.Option("--password", "-p", help="Feedbin password", hide_input=True)] = None,
+    password: Annotated[
+        str, typer.Option("--password", "-p", help="Feedbin password", hide_input=True)
+    ] = None,
 ) -> None:
     """Check authentication credentials with Feedbin API."""
 
@@ -54,7 +56,8 @@ def login(
             raise typer.Exit(1)
         else:
             typer.echo(
-                f"❌ Unexpected response: {response.status_code}", color=typer.colors.RED
+                f"❌ Unexpected response: {response.status_code}",
+                color=typer.colors.RED,
             )
             raise typer.Exit(1)
 
@@ -92,7 +95,8 @@ def status(ctx: typer.Context) -> None:
             typer.echo("✅ Authentication successful!", color=typer.colors.GREEN)
         elif response.status_code == 401:
             typer.echo(
-                "❌ Authentication failed - invalid credentials.", color=typer.colors.RED
+                "❌ Authentication failed - invalid credentials.",
+                color=typer.colors.RED,
             )
             typer.echo(
                 "Please run `feedscope auth login` to update your credentials.",
@@ -101,7 +105,8 @@ def status(ctx: typer.Context) -> None:
             raise typer.Exit(1)
         else:
             typer.echo(
-                f"❌ Unexpected response: {response.status_code}", color=typer.colors.RED
+                f"❌ Unexpected response: {response.status_code}",
+                color=typer.colors.RED,
             )
             raise typer.Exit(1)
 
@@ -114,7 +119,9 @@ def status(ctx: typer.Context) -> None:
 def whoami(ctx: typer.Context) -> None:
     """Show the current user from the config file."""
     state = get_state(ctx)
-    logger.debug("Inspecting current auth user with log config {}", state.log_config_path)
+    logger.debug(
+        "Inspecting current auth user with log config {}", state.log_config_path
+    )
     config = get_config()
 
     if config.auth.email and config.auth.password:
@@ -129,7 +136,9 @@ def whoami(ctx: typer.Context) -> None:
 def remove(ctx: typer.Context) -> None:
     """Remove stored authentication credentials."""
     state = get_state(ctx)
-    logger.debug("Removing stored credentials with log config {}", state.log_config_path)
+    logger.debug(
+        "Removing stored credentials with log config {}", state.log_config_path
+    )
     config = get_config()
     config_file = config.config_file_path
 
