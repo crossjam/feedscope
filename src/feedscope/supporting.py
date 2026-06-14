@@ -18,9 +18,9 @@ icons_app = typer.Typer(help="Manage icons")
 def _check_auth():
     config = get_config()
     if not config.auth.email or not config.auth.password:
-        typer.echo(
+        typer.secho(
             "❌ Authentication credentials not found. Please run `feedscope auth login` first.",
-            color=typer.colors.RED,
+            fg=typer.colors.RED,
         )
         raise typer.Exit(1)
     return config
@@ -44,17 +44,17 @@ def list_imports(
             if response.status_code == 200:
                 imports = response.json()
                 if json_output:
-                    typer.echo(json.dumps(imports, indent=2))
+                    typer.secho(json.dumps(imports, indent=2))
                 else:
                     for imp in imports:
-                        typer.echo(
+                        typer.secho(
                             f"ID: {imp['id']}, Complete: {imp['complete']}, Created: {imp['created_at']}"
                         )
             else:
-                typer.echo(f"Error: {response.status_code}", err=True)
+                typer.secho(f"Error: {response.status_code}", err=True)
                 raise typer.Exit(1)
     except httpx.RequestError as e:
-        typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        typer.secho(f"❌ Network error: {e}", fg=typer.colors.RED)
         raise typer.Exit(1)
 
 
@@ -76,19 +76,19 @@ def import_status(
             if response.status_code == 200:
                 imp = response.json()
                 if json_output:
-                    typer.echo(json.dumps(imp, indent=2))
+                    typer.secho(json.dumps(imp, indent=2))
                 else:
-                    typer.echo(
+                    typer.secho(
                         f"Import {imp['id']} Status: {'Complete' if imp['complete'] else 'Pending'}"
                     )
                     if "import_items" in imp:
                         for item in imp["import_items"]:
-                            typer.echo(f" - {item['title']}: {item['status']}")
+                            typer.secho(f" - {item['title']}: {item['status']}")
             else:
-                typer.echo(f"Error: {response.status_code}", err=True)
+                typer.secho(f"Error: {response.status_code}", err=True)
                 raise typer.Exit(1)
     except httpx.RequestError as e:
-        typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        typer.secho(f"❌ Network error: {e}", fg=typer.colors.RED)
         raise typer.Exit(1)
 
 
@@ -120,18 +120,18 @@ def create_import(
 
             if response.status_code == 201:
                 imp = response.json()
-                typer.echo("✅ Import created.", color=typer.colors.GREEN)
+                typer.secho("✅ Import created.", fg=typer.colors.GREEN)
                 if json_output:
-                    typer.echo(json.dumps(imp, indent=2))
+                    typer.secho(json.dumps(imp, indent=2))
                 else:
-                    typer.echo(f"ID: {imp['id']}")
+                    typer.secho(f"ID: {imp['id']}")
             else:
-                typer.echo(f"Error: {response.status_code}", err=True)
+                typer.secho(f"Error: {response.status_code}", err=True)
                 if json_output:
-                    typer.echo(response.text)
+                    typer.secho(response.text)
                 raise typer.Exit(1)
     except httpx.RequestError as e:
-        typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        typer.secho(f"❌ Network error: {e}", fg=typer.colors.RED)
         raise typer.Exit(1)
 
 
@@ -140,7 +140,7 @@ def create_import(
 def save_page(
     ctx: typer.Context,
     url: Annotated[str, typer.Option(help="URL to save")],
-    title: Annotated[str, typer.Option(help="Title of the page")] = None,
+    title: Annotated[str | None, typer.Option(help="Title of the page")] = None,
     json_output: Annotated[
         bool, typer.Option("--json", help="Output raw JSON")
     ] = False,
@@ -160,16 +160,16 @@ def save_page(
 
             if response.status_code == 200:  # Docs say 200 return entry
                 entry = response.json()
-                typer.echo("✅ Page saved.", color=typer.colors.GREEN)
+                typer.secho("✅ Page saved.", fg=typer.colors.GREEN)
                 if json_output:
-                    typer.echo(json.dumps(entry, indent=2))
+                    typer.secho(json.dumps(entry, indent=2))
                 else:
-                    typer.echo(f"Created Entry ID: {entry.get('id')}")
+                    typer.secho(f"Created Entry ID: {entry.get('id')}")
             else:
-                typer.echo(f"Error: {response.status_code}", err=True)
+                typer.secho(f"Error: {response.status_code}", err=True)
                 raise typer.Exit(1)
     except httpx.RequestError as e:
-        typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        typer.secho(f"❌ Network error: {e}", fg=typer.colors.RED)
         raise typer.Exit(1)
 
 
@@ -191,15 +191,15 @@ def list_icons(
             if response.status_code == 200:
                 icons = response.json()
                 if json_output:
-                    typer.echo(json.dumps(icons, indent=2))
+                    typer.secho(json.dumps(icons, indent=2))
                 else:
                     for icon in icons:
-                        typer.echo(f"{icon['host']}: {icon['url']}")
+                        typer.secho(f"{icon['host']}: {icon['url']}")
             else:
-                typer.echo(f"Error: {response.status_code}", err=True)
+                typer.secho(f"Error: {response.status_code}", err=True)
                 raise typer.Exit(1)
     except httpx.RequestError as e:
-        typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        typer.secho(f"❌ Network error: {e}", fg=typer.colors.RED)
         raise typer.Exit(1)
 
 
@@ -217,9 +217,9 @@ def extract_command(
     secret = config.extract.secret
 
     if not username or not secret:
-        typer.echo(
+        typer.secho(
             "❌ Extraction credentials not found in config (extract.username, extract.secret).",
-            color=typer.colors.RED,
+            fg=typer.colors.RED,
         )
         raise typer.Exit(1)
 
@@ -240,16 +240,16 @@ def extract_command(
             if response.status_code == 200:
                 data = response.json()
                 if json_output:
-                    typer.echo(json.dumps(data, indent=2))
+                    typer.secho(json.dumps(data, indent=2))
                 else:
-                    typer.echo(f"Title: {data.get('title')}")
-                    typer.echo(f"Word Count: {data.get('word_count')}")
-                    typer.echo(f"Excerpt: {data.get('excerpt')}")
+                    typer.secho(f"Title: {data.get('title')}")
+                    typer.secho(f"Word Count: {data.get('word_count')}")
+                    typer.secho(f"Excerpt: {data.get('excerpt')}")
             else:
-                typer.echo(f"Error extracting: {response.status_code}", err=True)
+                typer.secho(f"Error extracting: {response.status_code}", err=True)
                 if json_output:
-                    typer.echo(response.text)
+                    typer.secho(response.text)
                 raise typer.Exit(1)
     except httpx.RequestError as e:
-        typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        typer.secho(f"❌ Network error: {e}", fg=typer.colors.RED)
         raise typer.Exit(1)

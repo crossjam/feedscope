@@ -7,7 +7,11 @@ from pydantic_settings import (
 )
 
 from platformdirs import user_config_dir
+from collections.abc import MutableMapping
+from typing import cast
+
 from pathlib import Path
+
 import tomlkit
 
 
@@ -70,15 +74,17 @@ class FeedscopeConfig(BaseSettings):
         if "auth" not in doc or not isinstance(doc.get("auth"), dict):
             doc["auth"] = tomlkit.table()
 
-        doc["auth"]["email"] = self.auth.email
-        doc["auth"]["password"] = self.auth.password
+        auth_table = cast(MutableMapping, doc["auth"])
+        auth_table["email"] = self.auth.email
+        auth_table["password"] = self.auth.password
 
         # Update extract
         if "extract" not in doc or not isinstance(doc.get("extract"), dict):
             doc["extract"] = tomlkit.table()
 
-        doc["extract"]["username"] = self.extract.username
-        doc["extract"]["secret"] = self.extract.secret
+        extract_table = cast(MutableMapping, doc["extract"])
+        extract_table["username"] = self.extract.username
+        extract_table["secret"] = self.extract.secret
 
         if "email" in doc:
             del doc["email"]

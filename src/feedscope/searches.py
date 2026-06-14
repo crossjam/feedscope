@@ -21,9 +21,9 @@ def list_searches(
     """List all saved searches."""
     config = get_config()
     if not config.auth.email or not config.auth.password:
-        typer.echo(
+        typer.secho(
             "❌ Authentication credentials not found. Please run `feedscope auth login` first.",
-            color=typer.colors.RED,
+            fg=typer.colors.RED,
         )
         raise typer.Exit(1)
 
@@ -37,7 +37,7 @@ def list_searches(
             )
 
             if response.status_code != 200:
-                typer.echo(
+                typer.secho(
                     f"Error fetching saved searches: {response.status_code}", err=True
                 )
                 raise typer.Exit(1)
@@ -45,15 +45,15 @@ def list_searches(
             searches = response.json()
 
             if json_output:
-                typer.echo(json.dumps(searches, indent=2))
+                typer.secho(json.dumps(searches, indent=2))
             else:
                 for search in searches:
-                    typer.echo(
+                    typer.secho(
                         f"[{search['id']}] {search['name']} - Query: {search['query']}"
                     )
 
     except httpx.RequestError as e:
-        typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        typer.secho(f"❌ Network error: {e}", fg=typer.colors.RED)
         raise typer.Exit(1)
 
 
@@ -96,9 +96,9 @@ def create_search(
     """Create a new saved search."""
     config = get_config()
     if not config.auth.email or not config.auth.password:
-        typer.echo(
+        typer.secho(
             "❌ Authentication credentials not found. Please run `feedscope auth login` first.",
-            color=typer.colors.RED,
+            fg=typer.colors.RED,
         )
         raise typer.Exit(1)
 
@@ -114,21 +114,21 @@ def create_search(
             )
 
             if response.status_code == 201:
-                typer.echo(
-                    "✅ Saved search created successfully.", color=typer.colors.GREEN
+                typer.secho(
+                    "✅ Saved search created successfully.", fg=typer.colors.GREEN
                 )
                 if json_output:
-                    typer.echo(json.dumps(response.json(), indent=2))
+                    typer.secho(json.dumps(response.json(), indent=2))
             else:
-                typer.echo(
+                typer.secho(
                     f"Error creating saved search: {response.status_code}", err=True
                 )
                 if json_output:
-                    typer.echo(response.text)
+                    typer.secho(response.text)
                 raise typer.Exit(1)
 
     except httpx.RequestError as e:
-        typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        typer.secho(f"❌ Network error: {e}", fg=typer.colors.RED)
         raise typer.Exit(1)
 
 
@@ -145,9 +145,9 @@ def update_search(
     """Update a saved search."""
     config = get_config()
     if not config.auth.email or not config.auth.password:
-        typer.echo(
+        typer.secho(
             "❌ Authentication credentials not found. Please run `feedscope auth login` first.",
-            color=typer.colors.RED,
+            fg=typer.colors.RED,
         )
         raise typer.Exit(1)
 
@@ -159,7 +159,7 @@ def update_search(
         data["query"] = query
 
     if not data:
-        typer.echo("No updates provided.")
+        typer.secho("No updates provided.")
         return
 
     try:
@@ -171,22 +171,22 @@ def update_search(
             )
 
             if response.status_code == 200:
-                typer.echo(
-                    "✅ Saved search updated successfully.", color=typer.colors.GREEN
+                typer.secho(
+                    "✅ Saved search updated successfully.", fg=typer.colors.GREEN
                 )
                 if json_output:
-                    typer.echo(json.dumps(response.json(), indent=2))
+                    typer.secho(json.dumps(response.json(), indent=2))
             elif response.status_code == 403:
-                typer.echo("Forbidden. You may not own this saved search.", err=True)
+                typer.secho("Forbidden. You may not own this saved search.", err=True)
                 raise typer.Exit(1)
             else:
-                typer.echo(
+                typer.secho(
                     f"Error updating saved search: {response.status_code}", err=True
                 )
                 raise typer.Exit(1)
 
     except httpx.RequestError as e:
-        typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        typer.secho(f"❌ Network error: {e}", fg=typer.colors.RED)
         raise typer.Exit(1)
 
 
@@ -198,9 +198,9 @@ def delete_search(
     """Delete a saved search."""
     config = get_config()
     if not config.auth.email or not config.auth.password:
-        typer.echo(
+        typer.secho(
             "❌ Authentication credentials not found. Please run `feedscope auth login` first.",
-            color=typer.colors.RED,
+            fg=typer.colors.RED,
         )
         raise typer.Exit(1)
 
@@ -217,18 +217,18 @@ def delete_search(
             )
 
             if response.status_code == 204:
-                typer.echo(
-                    "✅ Saved search deleted successfully.", color=typer.colors.GREEN
+                typer.secho(
+                    "✅ Saved search deleted successfully.", fg=typer.colors.GREEN
                 )
             elif response.status_code == 403:
-                typer.echo("Forbidden. You may not own this saved search.", err=True)
+                typer.secho("Forbidden. You may not own this saved search.", err=True)
                 raise typer.Exit(1)
             else:
-                typer.echo(
+                typer.secho(
                     f"Error deleting saved search: {response.status_code}", err=True
                 )
                 raise typer.Exit(1)
 
     except httpx.RequestError as e:
-        typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        typer.secho(f"❌ Network error: {e}", fg=typer.colors.RED)
         raise typer.Exit(1)

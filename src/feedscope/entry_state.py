@@ -25,18 +25,18 @@ def _manage_entries_state(
 ):
     config = get_config()
     if not config.auth.email or not config.auth.password:
-        typer.echo(
+        typer.secho(
             "❌ Authentication credentials not found. Please run `feedscope auth login` first.",
-            color=typer.colors.RED,
+            fg=typer.colors.RED,
         )
         raise typer.Exit(1)
 
     if not entry_ids:
-        typer.echo("No entry IDs provided.", err=True)
+        typer.secho("No entry IDs provided.", err=True)
         return
 
     if len(entry_ids) > 1000:
-        typer.echo("❌ Limit of 1,000 entry_ids per request.", color=typer.colors.RED)
+        typer.secho("❌ Limit of 1,000 entry_ids per request.", fg=typer.colors.RED)
         raise typer.Exit(1)
 
     url = f"https://api.feedbin.com/v2/{endpoint}.json"
@@ -54,15 +54,15 @@ def _manage_entries_state(
             if response.status_code == 200:
                 result = response.json()
                 if json_output:
-                    typer.echo(json.dumps(result, indent=2))
+                    typer.secho(json.dumps(result, indent=2))
                 else:
-                    typer.echo(f"Successfully processed {len(result)} entries.")
+                    typer.secho(f"Successfully processed {len(result)} entries.")
             else:
-                typer.echo(f"Error: {response.status_code}", err=True)
+                typer.secho(f"Error: {response.status_code}", err=True)
                 raise typer.Exit(1)
 
     except httpx.RequestError as e:
-        typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        typer.secho(f"❌ Network error: {e}", fg=typer.colors.RED)
         raise typer.Exit(1)
 
 
@@ -169,9 +169,9 @@ def list_updated(
     if include_diff:
         config = get_config()
         if not config.auth.email or not config.auth.password:
-            typer.echo(
+            typer.secho(
                 "❌ Authentication credentials not found. Please run `feedscope auth login` first.",
-                color=typer.colors.RED,
+                fg=typer.colors.RED,
             )
             raise typer.Exit(1)
 
@@ -187,14 +187,14 @@ def list_updated(
                     auth=(config.auth.email, config.auth.password),
                 )
                 if response.status_code != 200:
-                    typer.echo(
+                    typer.secho(
                         f"Error fetching updated IDs: {response.status_code}", err=True
                     )
                     raise typer.Exit(1)
                 ids = response.json()
 
             if not ids:
-                typer.echo("No updated entries.")
+                typer.secho("No updated entries.")
                 return
 
             batch_ids = ids[:100]
@@ -214,13 +214,13 @@ def list_updated(
             )
 
             if len(ids) > 100:
-                typer.echo(
+                typer.secho(
                     f"Warning: Only showing first 100 of {len(ids)} updated entries.",
                     err=True,
                 )
 
         except httpx.RequestError as e:
-            typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+            typer.secho(f"❌ Network error: {e}", fg=typer.colors.RED)
             raise typer.Exit(1)
 
     else:

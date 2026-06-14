@@ -18,9 +18,9 @@ def fetch_and_display_entries(
     config = get_config()
 
     if not config.auth.email or not config.auth.password:
-        typer.echo(
+        typer.secho(
             "❌ Authentication credentials not found. Please run `feedscope auth login` first.",
-            color=typer.colors.RED,
+            fg=typer.colors.RED,
         )
         raise typer.Exit(1)
 
@@ -35,28 +35,28 @@ def fetch_and_display_entries(
             )
 
             if response.status_code != 200:
-                typer.echo(f"Error fetching entries: {response.status_code}", err=True)
+                typer.secho(f"Error fetching entries: {response.status_code}", err=True)
                 if response.status_code == 403:
-                    typer.echo("Forbidden. Check if you have access.", err=True)
+                    typer.secho("Forbidden. Check if you have access.", err=True)
                 elif response.status_code == 404:
-                    typer.echo("Not found.", err=True)
+                    typer.secho("Not found.", err=True)
                 raise typer.Exit(1)
 
             entries = response.json()
 
             if json_output:
-                typer.echo(json.dumps(entries, indent=2))
+                typer.secho(json.dumps(entries, indent=2))
             else:
                 for entry in entries:
                     if isinstance(entry, int):
                         # It's a list of IDs (e.g. unread, starred, updated)
-                        typer.echo(entry)
+                        typer.secho(entry)
                     else:
                         title = entry.get("title") or "(No Title)"
                         entry_id = entry.get("id")
                         published = entry.get("published")
-                        typer.echo(f"[{entry_id}] {published} - {title}")
+                        typer.secho(f"[{entry_id}] {published} - {title}")
 
     except httpx.RequestError as e:
-        typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        typer.secho(f"❌ Network error: {e}", fg=typer.colors.RED)
         raise typer.Exit(1)

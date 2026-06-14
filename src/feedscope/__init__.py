@@ -36,7 +36,7 @@ def configure_logging(config_file: Path | None) -> AppState:
         logger.debug("Logging configured from {}", config_file)
         return AppState(log_config_path=config_file, log_config_data=config_data)
     except Exception as exc:  # pragma: no cover - defensive catch for CLI UX
-        typer.echo(
+        typer.secho(
             f"❌ Failed to configure logging from {config_file}: {exc}",
             err=True,
         )

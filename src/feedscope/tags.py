@@ -13,9 +13,9 @@ taggings_app = typer.Typer(help="Manage taggings")
 def _check_auth():
     config = get_config()
     if not config.auth.email or not config.auth.password:
-        typer.echo(
+        typer.secho(
             "❌ Authentication credentials not found. Please run `feedscope auth login` first.",
-            color=typer.colors.RED,
+            fg=typer.colors.RED,
         )
         raise typer.Exit(1)
     return config
@@ -45,14 +45,14 @@ def rename_tag(
             )
 
             if response.status_code == 200:
-                typer.echo("✅ Tag renamed successfully.", color=typer.colors.GREEN)
+                typer.secho("✅ Tag renamed successfully.", fg=typer.colors.GREEN)
                 if json_output:
-                    typer.echo(json.dumps(response.json(), indent=2))
+                    typer.secho(json.dumps(response.json(), indent=2))
             else:
-                typer.echo(f"Error renaming tag: {response.status_code}", err=True)
+                typer.secho(f"Error renaming tag: {response.status_code}", err=True)
                 raise typer.Exit(1)
     except httpx.RequestError as e:
-        typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        typer.secho(f"❌ Network error: {e}", fg=typer.colors.RED)
         raise typer.Exit(1)
 
 
@@ -84,14 +84,14 @@ def delete_tag(
             )
 
             if response.status_code == 200:
-                typer.echo("✅ Tag deleted successfully.", color=typer.colors.GREEN)
+                typer.secho("✅ Tag deleted successfully.", fg=typer.colors.GREEN)
                 if json_output:
-                    typer.echo(json.dumps(response.json(), indent=2))
+                    typer.secho(json.dumps(response.json(), indent=2))
             else:
-                typer.echo(f"Error deleting tag: {response.status_code}", err=True)
+                typer.secho(f"Error deleting tag: {response.status_code}", err=True)
                 raise typer.Exit(1)
     except httpx.RequestError as e:
-        typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        typer.secho(f"❌ Network error: {e}", fg=typer.colors.RED)
         raise typer.Exit(1)
 
 
@@ -117,17 +117,17 @@ def list_taggings(
             if response.status_code == 200:
                 taggings = response.json()
                 if json_output:
-                    typer.echo(json.dumps(taggings, indent=2))
+                    typer.secho(json.dumps(taggings, indent=2))
                 else:
                     for tagging in taggings:
-                        typer.echo(
+                        typer.secho(
                             f"[{tagging['id']}] Feed {tagging['feed_id']} -> {tagging['name']}"
                         )
             else:
-                typer.echo(f"Error fetching taggings: {response.status_code}", err=True)
+                typer.secho(f"Error fetching taggings: {response.status_code}", err=True)
                 raise typer.Exit(1)
     except httpx.RequestError as e:
-        typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        typer.secho(f"❌ Network error: {e}", fg=typer.colors.RED)
         raise typer.Exit(1)
 
 
@@ -154,16 +154,16 @@ def create_tagging(
             )
 
             if response.status_code == 201:
-                typer.echo("✅ Tagging created successfully.", color=typer.colors.GREEN)
+                typer.secho("✅ Tagging created successfully.", fg=typer.colors.GREEN)
                 if json_output:
-                    typer.echo(json.dumps(response.json(), indent=2))
+                    typer.secho(json.dumps(response.json(), indent=2))
             elif response.status_code == 302:
-                typer.echo("ℹ️ Tagging already exists.", color=typer.colors.YELLOW)
+                typer.secho("ℹ️ Tagging already exists.", fg=typer.colors.YELLOW)
             else:
-                typer.echo(f"Error creating tagging: {response.status_code}", err=True)
+                typer.secho(f"Error creating tagging: {response.status_code}", err=True)
                 raise typer.Exit(1)
     except httpx.RequestError as e:
-        typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        typer.secho(f"❌ Network error: {e}", fg=typer.colors.RED)
         raise typer.Exit(1)
 
 
@@ -188,13 +188,13 @@ def delete_tagging(
             )
 
             if response.status_code == 204:
-                typer.echo("✅ Tagging deleted successfully.", color=typer.colors.GREEN)
+                typer.secho("✅ Tagging deleted successfully.", fg=typer.colors.GREEN)
             elif response.status_code == 403:
-                typer.echo("Forbidden. You may not own this tagging.", err=True)
+                typer.secho("Forbidden. You may not own this tagging.", err=True)
                 raise typer.Exit(1)
             else:
-                typer.echo(f"Error deleting tagging: {response.status_code}", err=True)
+                typer.secho(f"Error deleting tagging: {response.status_code}", err=True)
                 raise typer.Exit(1)
     except httpx.RequestError as e:
-        typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        typer.secho(f"❌ Network error: {e}", fg=typer.colors.RED)
         raise typer.Exit(1)

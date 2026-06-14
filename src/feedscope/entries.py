@@ -163,9 +163,9 @@ def show_entry(
     config = get_config()
 
     if not config.auth.email or not config.auth.password:
-        typer.echo(
+        typer.secho(
             "❌ Authentication credentials not found. Please run `feedscope auth login` first.",
-            color=typer.colors.RED,
+            fg=typer.colors.RED,
         )
         raise typer.Exit(1)
 
@@ -189,27 +189,27 @@ def show_entry(
             )
 
             if response.status_code != 200:
-                typer.echo(f"Error fetching entry: {response.status_code}", err=True)
+                typer.secho(f"Error fetching entry: {response.status_code}", err=True)
                 if response.status_code == 404:
-                    typer.echo("Entry not found.", err=True)
+                    typer.secho("Entry not found.", err=True)
                 elif response.status_code == 403:
-                    typer.echo(
+                    typer.secho(
                         "Forbidden. You may not have access to this entry.", err=True
                     )
                 raise typer.Exit(1)
 
             entry = response.json()
             if json_output:
-                typer.echo(json.dumps(entry, indent=2))
+                typer.secho(json.dumps(entry, indent=2))
             else:
-                typer.echo(f"Title: {entry.get('title')}")
-                typer.echo(f"ID: {entry.get('id')}")
-                typer.echo(f"Published: {entry.get('published')}")
-                typer.echo(f"URL: {entry.get('url')}")
+                typer.secho(f"Title: {entry.get('title')}")
+                typer.secho(f"ID: {entry.get('id')}")
+                typer.secho(f"Published: {entry.get('published')}")
+                typer.secho(f"URL: {entry.get('url')}")
                 if mode == "extended":
-                    typer.echo(f"Author: {entry.get('author')}")
-                    typer.echo(f"Summary: {entry.get('summary')}")
+                    typer.secho(f"Author: {entry.get('author')}")
+                    typer.secho(f"Summary: {entry.get('summary')}")
 
     except httpx.RequestError as e:
-        typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        typer.secho(f"❌ Network error: {e}", fg=typer.colors.RED)
         raise typer.Exit(1)
