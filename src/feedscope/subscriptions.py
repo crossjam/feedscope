@@ -20,7 +20,7 @@ def subscriptions(ctx: typer.Context):
     """
     get_state(ctx)
     if ctx.invoked_subcommand is None:
-        typer.echo(ctx.get_help())
+        typer.secho(ctx.get_help())
         raise typer.Exit()
 
 
@@ -28,7 +28,7 @@ def subscriptions(ctx: typer.Context):
 def list_subscriptions(
     ctx: typer.Context,
     limit: Annotated[
-        int,
+        int | None,
         typer.Option(
             "--limit",
             "-l",
@@ -58,9 +58,9 @@ def list_subscriptions(
     config = get_config()
 
     if not config.auth.email or not config.auth.password:
-        typer.echo(
+        typer.secho(
             "❌ Authentication credentials not found. Please run `feedscope auth login` first.",
-            color=typer.colors.RED,
+            fg=typer.colors.RED,
         )
         raise typer.Exit(1)
 
@@ -74,17 +74,17 @@ def list_subscriptions(
                 url,
                 auth=(config.auth.email, config.auth.password),
             )
-            typer.echo(f"Retrieving: {response.request.url}", err=True)
+            typer.secho(f"Retrieving: {response.request.url}", err=True)
             if response.status_code != 200:
                 if response.status_code == 401:
-                    typer.echo(
+                    typer.secho(
                         "❌ Authentication failed. Please run `feedscope auth login` again.",
-                        color=typer.colors.RED,
+                        fg=typer.colors.RED,
                     )
                 else:
-                    typer.echo(
+                    typer.secho(
                         f"❌ Unexpected response: {response.status_code}",
-                        color=typer.colors.RED,
+                        fg=typer.colors.RED,
                     )
                 raise typer.Exit(1)
 
@@ -92,7 +92,7 @@ def list_subscriptions(
 
         if not all_subscriptions:
             if not jsonl:
-                typer.echo("No subscriptions found.")
+                typer.secho("No subscriptions found.")
             return
 
         if limit:
@@ -100,16 +100,16 @@ def list_subscriptions(
 
         if jsonl:
             for sub in all_subscriptions:
-                typer.echo(json.dumps(sub))
+                typer.secho(json.dumps(sub))
         elif extended:
             for sub in all_subscriptions:
-                typer.echo(json.dumps(sub, indent=2))
+                typer.secho(json.dumps(sub, indent=2))
         else:
             for sub in all_subscriptions:
-                typer.echo(f"[{sub['id']}] {sub['title']} - {sub['feed_url']}")
+                typer.secho(f"[{sub['id']}] {sub['title']} - {sub['feed_url']}")
 
     except httpx.RequestError as e:
-        typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        typer.secho(f"❌ Network error: {e}", fg=typer.colors.RED)
         raise typer.Exit(1)
 
 
@@ -134,9 +134,9 @@ def get_subscriptions(
     config = get_config()
 
     if not config.auth.email or not config.auth.password:
-        typer.echo(
+        typer.secho(
             "❌ Authentication credentials not found. Please run `feedscope auth login` first.",
-            color=typer.colors.RED,
+            fg=typer.colors.RED,
         )
         raise typer.Exit(1)
 
@@ -151,34 +151,34 @@ def get_subscriptions(
                     url,
                     auth=(config.auth.email, config.auth.password),
                 )
-                typer.echo(f"Retrieving: {response.request.url}", err=True)
+                typer.secho(f"Retrieving: {response.request.url}", err=True)
 
                 if response.status_code != 200:
                     if response.status_code == 401:
-                        typer.echo(
+                        typer.secho(
                             "❌ Authentication failed. Please run `feedscope auth login` again.",
-                            color=typer.colors.RED,
+                            fg=typer.colors.RED,
                         )
                         raise typer.Exit(1)
                     elif response.status_code == 403:
-                        typer.echo(
+                        typer.secho(
                             f"⚠️ Forbidden: You may not own subscription with ID {subscription_id}. Skipping.",
-                            color=typer.colors.YELLOW,
+                            fg=typer.colors.YELLOW,
                             err=True,
                         )
                     else:
-                        typer.echo(
+                        typer.secho(
                             f"⚠️ Unexpected response for subscription ID {subscription_id}: {response.status_code}. Skipping.",
-                            color=typer.colors.YELLOW,
+                            fg=typer.colors.YELLOW,
                             err=True,
                         )
                     continue
 
                 subscription = response.json()
-                typer.echo(json.dumps(subscription, indent=2))
+                typer.secho(json.dumps(subscription, indent=2))
 
     except httpx.RequestError as e:
-        typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        typer.secho(f"❌ Network error: {e}", fg=typer.colors.RED)
         raise typer.Exit(1)
 
 
@@ -195,9 +195,9 @@ def create_subscription(
     config = get_config()
 
     if not config.auth.email or not config.auth.password:
-        typer.echo(
+        typer.secho(
             "❌ Authentication credentials not found. Please run `feedscope auth login` first.",
-            color=typer.colors.RED,
+            fg=typer.colors.RED,
         )
         raise typer.Exit(1)
 
@@ -216,29 +216,29 @@ def create_subscription(
                     if response.status_code == 201
                     else "ℹ️ Subscription already exists."
                 )
-                typer.echo(status_message, color=typer.colors.GREEN)
-                typer.echo(json.dumps(response.json(), indent=2))
+                typer.secho(status_message, fg=typer.colors.GREEN)
+                typer.secho(json.dumps(response.json(), indent=2))
             elif response.status_code == 300:
-                typer.echo(
+                typer.secho(
                     "⚠️ Multiple feeds found. Please use the exact feed_url from the options below:",
-                    color=typer.colors.YELLOW,
+                    fg=typer.colors.YELLOW,
                 )
-                typer.echo(json.dumps(response.json(), indent=2))
+                typer.secho(json.dumps(response.json(), indent=2))
             elif response.status_code == 404:
-                typer.echo(
+                typer.secho(
                     f"❌ No feed found at the specified URL: {feed_url}",
-                    color=typer.colors.RED,
+                    fg=typer.colors.RED,
                 )
                 raise typer.Exit(1)
             else:
-                typer.echo(
+                typer.secho(
                     f"❌ Unexpected response: {response.status_code}",
-                    color=typer.colors.RED,
+                    fg=typer.colors.RED,
                 )
                 raise typer.Exit(1)
 
     except httpx.RequestError as e:
-        typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        typer.secho(f"❌ Network error: {e}", fg=typer.colors.RED)
         raise typer.Exit(1)
 
 
@@ -263,9 +263,9 @@ def update_subscription(
     config = get_config()
 
     if not config.auth.email or not config.auth.password:
-        typer.echo(
+        typer.secho(
             "❌ Authentication credentials not found. Please run `feedscope auth login` first.",
-            color=typer.colors.RED,
+            fg=typer.colors.RED,
         )
         raise typer.Exit(1)
 
@@ -280,23 +280,23 @@ def update_subscription(
 
             if response.status_code == 200:
                 if not json_output:
-                    typer.echo("✅ Subscription updated successfully.")
-                typer.echo(json.dumps(response.json(), indent=2))
+                    typer.secho("✅ Subscription updated successfully.")
+                typer.secho(json.dumps(response.json(), indent=2))
             elif response.status_code == 403:
-                typer.echo(
+                typer.secho(
                     f"❌ Forbidden: You may not own the subscription with ID {subscription_id}.",
-                    color=typer.colors.RED,
+                    fg=typer.colors.RED,
                 )
                 raise typer.Exit(1)
             else:
-                typer.echo(
+                typer.secho(
                     f"❌ Unexpected response: {response.status_code}",
-                    color=typer.colors.RED,
+                    fg=typer.colors.RED,
                 )
                 raise typer.Exit(1)
 
     except httpx.RequestError as e:
-        typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        typer.secho(f"❌ Network error: {e}", fg=typer.colors.RED)
         raise typer.Exit(1)
 
 
@@ -318,9 +318,9 @@ def delete_subscription(
     config = get_config()
 
     if not config.auth.email or not config.auth.password:
-        typer.echo(
+        typer.secho(
             "❌ Authentication credentials not found. Please run `feedscope auth login` first.",
-            color=typer.colors.RED,
+            fg=typer.colors.RED,
         )
         raise typer.Exit(1)
 
@@ -333,23 +333,23 @@ def delete_subscription(
             )
 
             if response.status_code == 204:
-                typer.echo(
+                typer.secho(
                     f"✅ Subscription {subscription_id} deleted successfully.",
-                    color=typer.colors.GREEN,
+                    fg=typer.colors.GREEN,
                 )
             elif response.status_code == 403:
-                typer.echo(
+                typer.secho(
                     f"❌ Forbidden: You may not own the subscription with ID {subscription_id}.",
-                    color=typer.colors.RED,
+                    fg=typer.colors.RED,
                 )
                 raise typer.Exit(1)
             else:
-                typer.echo(
+                typer.secho(
                     f"❌ Unexpected response: {response.status_code}",
-                    color=typer.colors.RED,
+                    fg=typer.colors.RED,
                 )
                 raise typer.Exit(1)
 
     except httpx.RequestError as e:
-        typer.echo(f"❌ Network error: {e}", color=typer.colors.RED)
+        typer.secho(f"❌ Network error: {e}", fg=typer.colors.RED)
         raise typer.Exit(1)

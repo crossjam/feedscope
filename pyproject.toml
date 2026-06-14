@@ -17,6 +17,7 @@ dependencies = [
     "rich>=14.1.0",
     "hishel>=0.0.36",
     "loguru-config",
+    "stamina>=25.2.0",
 ]
 
 [project.scripts]
@@ -30,6 +31,7 @@ build-backend = "setuptools.build_meta"
 dev = [
     "poethepoet>=0.32.2",
     "pytest>=8.3.3",
+    "respx>=0.22.0",
     "ruff>=0.7.3",
     "ty==0.0.1a27",
 ]
@@ -37,7 +39,7 @@ dev = [
 [tool.poe.tasks]
 lint = { cmd = "uv run ruff check src tests" }
 format = { cmd = "uv run ruff format src tests" }
-typecheck = { cmd = "uv run ty src/feedscope" }
+typecheck = { cmd = "uv run ty check src/feedscope" }
 test = { cmd = "uv run pytest" }
 qa = { sequence = ["lint", "typecheck", "test"] }
 

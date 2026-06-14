@@ -1,35 +1,11 @@
 """Basic CLI operation tests for feedscope."""
+
 from pathlib import Path
 import json
-import os
 
-import pytest
 from platformdirs import user_config_dir
 from typer.testing import CliRunner
-
-# Ensure configuration writes are isolated to a test-specific directory
-TEST_CONFIG_HOME = Path(__file__).parent / "_config_home"
-TEST_CONFIG_HOME.mkdir(parents=True, exist_ok=True)
-os.environ["XDG_CONFIG_HOME"] = str(TEST_CONFIG_HOME)
-
 from feedscope import app
-
-
-CONFIG_FILE = Path(user_config_dir("dev.pirateninja.feedscope")) / "config.toml"
-
-
-@pytest.fixture(autouse=True)
-def clean_config_file() -> None:
-    """Ensure the config file is removed before and after each test."""
-
-    if CONFIG_FILE.exists():
-        CONFIG_FILE.unlink()
-
-    yield
-
-    if CONFIG_FILE.exists():
-        CONFIG_FILE.unlink()
-
 
 runner = CliRunner()
 
@@ -101,7 +77,7 @@ def test_log_config_supports_toml(tmp_path: Path) -> None:
         "\n".join(
             [
                 "handlers = [",
-                f"  {{ sink = \"{log_file}\", format = \"{{message}}\", level = \"DEBUG\" }}",
+                f'  {{ sink = "{log_file}", format = "{{message}}", level = "DEBUG" }}',
                 "]",
                 "",
             ]
@@ -149,7 +125,9 @@ def test_config_location_emits_logging(tmp_path: Path) -> None:
         )
     )
 
-    result = runner.invoke(app, ["--log-config", str(config_file), "config", "location"])
+    result = runner.invoke(
+        app, ["--log-config", str(config_file), "config", "location"]
+    )
 
     assert result.exit_code == 0
     assert log_file.exists()

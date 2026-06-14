@@ -7,7 +7,11 @@ from pydantic_settings import (
 )
 
 from platformdirs import user_config_dir
+from collections.abc import MutableMapping
+from typing import cast
+
 from pathlib import Path
+
 import tomlkit
 
 
@@ -18,12 +22,20 @@ class AuthCredentials(BaseModel):
     password: str = ""
 
 
+class ExtractCredentials(BaseModel):
+    """Extraction service credentials."""
+
+    username: str = ""
+    secret: str = ""
+
+
 class FeedscopeConfig(BaseSettings):
     model_config = SettingsConfigDict(
         toml_file=Path(user_config_dir("dev.pirateninja.feedscope")) / "config.toml",
     )
 
     auth: AuthCredentials = AuthCredentials()
+    extract: ExtractCredentials = ExtractCredentials()
 
     @classmethod
     def settings_customise_sources(
@@ -58,12 +70,21 @@ class FeedscopeConfig(BaseSettings):
         else:
             doc = tomlkit.document()
 
-        # Update values
+        # Update auth
         if "auth" not in doc or not isinstance(doc.get("auth"), dict):
             doc["auth"] = tomlkit.table()
 
-        doc["auth"]["email"] = self.auth.email
-        doc["auth"]["password"] = self.auth.password
+        auth_table = cast(MutableMapping, doc["auth"])
+        auth_table["email"] = self.auth.email
+        auth_table["password"] = self.auth.password
+
+        # Update extract
+        if "extract" not in doc or not isinstance(doc.get("extract"), dict):
+            doc["extract"] = tomlkit.table()
+
+        extract_table = cast(MutableMapping, doc["extract"])
+        extract_table["username"] = self.extract.username
+        extract_table["secret"] = self.extract.secret
 
         if "email" in doc:
             del doc["email"]
